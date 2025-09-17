@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'api',
     'employees',
     'documentation',
     'research',
@@ -151,3 +152,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
     ],
 }
+
+# Настройки CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React/Svelte dev server
+    "http://127.0.0.1:3000",
+]
