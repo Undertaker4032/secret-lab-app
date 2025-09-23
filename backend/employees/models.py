@@ -26,14 +26,14 @@ class Department(models.Model):
     def __str__(self):
         return f"{self.name} ({self.cluster.name})"
     
-# Модель Подразделение
+# Модель Отдел
 class Division(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='divisions', verbose_name='Подразделения')
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='divisions', verbose_name='Отделы')
 
     class Meta:
-        verbose_name = 'Подразделение'
-        verbose_name_plural = 'Подразделения'
+        verbose_name = 'Отдел'
+        verbose_name_plural = 'Отделы'
         unique_together = ('name', 'department')
         indexes = [models.Index(fields=['department', 'name']),]
 
@@ -75,7 +75,7 @@ class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,verbose_name='Пользователь')
     name = models.CharField(max_length=100, on_delete=models.CASCADE, verbose_name='Имя и Фамилия')
     clearance_level = models.ForeignKey(ClearanceLevel, on_delete=models.SET_NULL, verbose_name='Уровень Допуска')
-    division = models.ForeignKey(Division, on_delete=models.PROTECT, verbose_name='Подразделение')
+    division = models.ForeignKey(Division, on_delete=models.PROTECT, verbose_name='Отдел')
 
     @property
     def department(self):

@@ -38,4 +38,4 @@ class EmployeeSerializer(serializers.ModelSerializer):
         fields = ['id', 'name',
                   'clearance_level', 'cluster',
                   'department', 'division',
-                  'position', 'picture']
+                  'position', 'profile_picture']
