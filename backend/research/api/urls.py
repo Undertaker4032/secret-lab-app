@@ -4,7 +4,7 @@ from . import views
 
 # router для приложения
 router = DefaultRouter()
-router.register(r'', views.ResearchViewSet)  # Регистрация ViewSet
+router.register(r'', views.ResearchViewSet, basename='research')  # Регистрация ViewSet
 
 # URL patterns для приложения
 urlpatterns = [

@@ -8,8 +8,8 @@ class DocumentTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Documentation)
 class DocumentationAdmin(admin.ModelAdmin):
-    list_display = ('title', 'type', 'author', 'created_date', 'required_clearance', 'is_confidentional')
-    list_filter = ('type', 'created_date', 'required_clearance', 'is_confidentional')
+    list_display = ('title', 'type', 'author', 'created_date', 'required_clearance')
+    list_filter = ('type', 'created_date', 'required_clearance')
     search_fields = ('title', 'content')
     readonly_fields = ('created_date', 'updated_date')
     date_hierarchy = 'created_date'
@@ -19,7 +19,7 @@ class DocumentationAdmin(admin.ModelAdmin):
             'fields': ('title', 'type', 'content')
         }),
         ('Метаданные', {
-            'fields': ('author', 'required_clearance', 'is_confidentional')
+            'fields': ('author', 'required_clearance')
         }),
         ('Даты', {
             'fields': ('created_date', 'updated_date'),

@@ -1,8 +1,8 @@
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Research
-from .serializers import ResearchSeralizer
-from ...employees.api.permissions import ReadOnly
+from .serializers import ResearchSerializer
+from employees.api.permissions import ReadOnly
 
 class ResearchViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
@@ -12,7 +12,7 @@ class ResearchViewSet(viewsets.ModelViewSet):
             'required_clearance'
         ).prefetch_related('team').all()
     
-    serializer_class = ResearchSeralizer
+    serializer_class = ResearchSerializer
     permission_classes = [ReadOnly]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

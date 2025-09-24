@@ -43,7 +43,7 @@ class Division(models.Model):
 # Модель Должность
 class Position(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
-    cluster = models.ForeignKey(Cluster, on_delete=models.CASCADE, related_name='positions', verbose_name='Кластеры')
+    cluster = models.ForeignKey(Cluster, on_delete=models.CASCADE, null=True, related_name='positions', verbose_name='Кластеры')
 
     class Meta:
         verbose_name = 'Должность'
@@ -73,8 +73,8 @@ class ClearanceLevel(models.Model):
 class Employee(models.Model):
     # Связь с моделью User для аутентификации
     user = models.OneToOneField(User, on_delete=models.CASCADE,verbose_name='Пользователь')
-    name = models.CharField(max_length=100, on_delete=models.CASCADE, verbose_name='Имя и Фамилия')
-    clearance_level = models.ForeignKey(ClearanceLevel, on_delete=models.SET_NULL, verbose_name='Уровень Допуска')
+    name = models.CharField(max_length=100, verbose_name='Имя и Фамилия')
+    clearance_level = models.ForeignKey(ClearanceLevel, null=True, on_delete=models.SET_NULL, verbose_name='Уровень Допуска')
     division = models.ForeignKey(Division, on_delete=models.PROTECT, verbose_name='Отдел')
 
     @property
@@ -85,8 +85,8 @@ class Employee(models.Model):
     def cluster(self):
         return self.division.department.cluster
     
-    position = models.ForeignKey(Position, on_delete=models.SET_NULL, verbose_name='Должность')
-    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True, on_delete=models.SET_NULL, verbose_name='Фото')
+    position = models.ForeignKey(Position, null=True, on_delete=models.SET_NULL, verbose_name='Должность')
+    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True, verbose_name='Фото')
 
     class Meta:
         verbose_name = 'Сотрудник'

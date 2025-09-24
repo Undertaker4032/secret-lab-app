@@ -2,7 +2,7 @@ from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Documentation
 from .serializers import DocumentSerializer
-from ...employees.api.permissions import ReadOnly
+from employees.api.permissions import ReadOnly
 
 class DocumentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):

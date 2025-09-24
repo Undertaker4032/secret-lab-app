@@ -5,7 +5,7 @@ class ResearchSerializer(serializers.ModelSerializer):
     lead_name = serializers.CharField(source='lead.name', read_only=True)
     team_members = serializers.SerializerMethodField()
     status_name = serializers.CharField(source='status.name', read_only=True)
-    required_clearance_number = serializers.CharField(source='required_clearance.number', read_only=True)
+    required_clearance_name = serializers.CharField(source='required_clearance.name', read_only=True)
 
     class Meta:
         model = Research
@@ -14,7 +14,7 @@ class ResearchSerializer(serializers.ModelSerializer):
                   'lead', 'lead_name',
                   'team', 'team_members',
                   'status', 'status_name',
-                  'required_clearance', 'required_clearance_number',
+                  'required_clearance', 'required_clearance_name',
                   'findings', 'created_date',
                   'updated_date']
     read_only_fields = ['created_date', 'updated_date']

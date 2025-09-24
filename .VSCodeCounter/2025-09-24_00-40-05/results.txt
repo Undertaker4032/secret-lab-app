@@ -1,0 +1,99 @@
+Date : 2025-09-24 00:40:05
+Directory : c:\Files\RMS-site\backend
+Total : 57 files,  861 codes, 94 comments, 231 blanks, all 1186 lines
+
+Languages
++------------------+------------+------------+------------+------------+------------+
+| language         | files      | code       | comment    | blank      | total      |
++------------------+------------+------------+------------+------------+------------+
+| Python           |         56 |        846 |         94 |        231 |      1,171 |
+| pip requirements |          1 |         15 |          0 |          0 |         15 |
++------------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                               | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                  |         57 |        861 |         94 |        231 |      1,186 |
+| . (Files)                                                                                                          |          2 |         30 |          3 |          5 |         38 |
+| api                                                                                                                |          8 |         14 |          4 |         14 |         32 |
+| api (Files)                                                                                                        |          7 |         14 |          4 |         13 |         31 |
+| api\migrations                                                                                                     |          1 |          0 |          0 |          1 |          1 |
+| documentation                                                                                                      |         13 |        155 |          8 |         41 |        204 |
+| documentation (Files)                                                                                              |          6 |         54 |          4 |         17 |         75 |
+| documentation\api                                                                                                  |          4 |         50 |          2 |         10 |         62 |
+| documentation\migrations                                                                                           |          3 |         51 |          2 |         14 |         67 |
+| employees                                                                                                          |         16 |        353 |         17 |         81 |        451 |
+| employees (Files)                                                                                                  |          6 |        119 |         11 |         39 |        169 |
+| employees\api                                                                                                      |          5 |         71 |          2 |         16 |         89 |
+| employees\migrations                                                                                               |          5 |        163 |          4 |         26 |        193 |
+| research                                                                                                           |         13 |        186 |          8 |         42 |        236 |
+| research (Files)                                                                                                   |          6 |         61 |          4 |         17 |         82 |
+| research\api                                                                                                       |          4 |         59 |          2 |         11 |         72 |
+| research\migrations                                                                                                |          3 |         66 |          2 |         14 |         82 |
+| secret_lab                                                                                                         |          5 |        123 |         54 |         48 |        225 |
++--------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| filename                                                                                                           | language         | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| c:\Files\RMS-site\backend\api\__init__.py                                                                          | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\api\admin.py                                                                             | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\api\apps.py                                                                              | Python           |          4 |          0 |          3 |          7 |
+| c:\Files\RMS-site\backend\api\migrations\__init__.py                                                               | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\api\models.py                                                                            | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\api\tests.py                                                                             | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\api\urls.py                                                                              | Python           |          6 |          0 |          1 |          7 |
+| c:\Files\RMS-site\backend\api\views.py                                                                             | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\documentation\__init__.py                                                                | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\documentation\admin.py                                                                   | Python           |         25 |          0 |          3 |         28 |
+| c:\Files\RMS-site\backend\documentation\api\__init__.py                                                            | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\documentation\api\serializers.py                                                         | Python           |         14 |          0 |          2 |         16 |
+| c:\Files\RMS-site\backend\documentation\api\urls.py                                                                | Python           |          8 |          2 |          2 |         12 |
+| c:\Files\RMS-site\backend\documentation\api\views.py                                                               | Python           |         28 |          0 |          5 |         33 |
+| c:\Files\RMS-site\backend\documentation\apps.py                                                                    | Python           |          4 |          0 |          3 |          7 |
+| c:\Files\RMS-site\backend\documentation\migrations\0001_initial.py                                                 | Python           |         39 |          1 |          7 |         47 |
+| c:\Files\RMS-site\backend\documentation\migrations\0002_alter_documentation_updated_date.py                        | Python           |         12 |          1 |          6 |         19 |
+| c:\Files\RMS-site\backend\documentation\migrations\__init__.py                                                     | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\documentation\models.py                                                                  | Python           |         23 |          2 |          6 |         31 |
+| c:\Files\RMS-site\backend\documentation\tests.py                                                                   | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\documentation\views.py                                                                   | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\employees\__init__.py                                                                    | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\employees\admin.py                                                                       | Python           |         46 |          2 |          9 |         57 |
+| c:\Files\RMS-site\backend\employees\api\__init__.py                                                                | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\employees\api\permissions.py                                                             | Python           |          4 |          0 |          1 |          5 |
+| c:\Files\RMS-site\backend\employees\api\serializers.py                                                             | Python           |         34 |          0 |          7 |         41 |
+| c:\Files\RMS-site\backend\employees\api\urls.py                                                                    | Python           |          8 |          2 |          2 |         12 |
+| c:\Files\RMS-site\backend\employees\api\views.py                                                                   | Python           |         25 |          0 |          5 |         30 |
+| c:\Files\RMS-site\backend\employees\apps.py                                                                        | Python           |          4 |          0 |          3 |          7 |
+| c:\Files\RMS-site\backend\employees\migrations\0001_initial.py                                                     | Python           |        108 |          1 |          7 |        116 |
+| c:\Files\RMS-site\backend\employees\migrations\0002_alter_clearancelevel_options_clearancelevel_number_and_more.py | Python           |         27 |          1 |          6 |         34 |
+| c:\Files\RMS-site\backend\employees\migrations\0003_remove_clearancelevel_name_alter_division_department.py        | Python           |         17 |          1 |          6 |         24 |
+| c:\Files\RMS-site\backend\employees\migrations\0004_alter_position_options.py                                      | Python           |         11 |          1 |          6 |         18 |
+| c:\Files\RMS-site\backend\employees\migrations\__init__.py                                                         | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\employees\models.py                                                                      | Python           |         67 |          7 |         22 |         96 |
+| c:\Files\RMS-site\backend\employees\tests.py                                                                       | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\employees\views.py                                                                       | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\manage.py                                                                                | Python           |         15 |          3 |          5 |         23 |
+| c:\Files\RMS-site\backend\requirements.txt                                                                         | pip requirements |         15 |          0 |          0 |         15 |
+| c:\Files\RMS-site\backend\research\__init__.py                                                                     | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\research\admin.py                                                                        | Python           |         29 |          0 |          3 |         32 |
+| c:\Files\RMS-site\backend\research\api\__init__.py                                                                 | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\research\api\serializers.py                                                              | Python           |         20 |          0 |          3 |         23 |
+| c:\Files\RMS-site\backend\research\api\urls.py                                                                     | Python           |          8 |          2 |          2 |         12 |
+| c:\Files\RMS-site\backend\research\api\views.py                                                                    | Python           |         31 |          0 |          5 |         36 |
+| c:\Files\RMS-site\backend\research\apps.py                                                                         | Python           |          4 |          0 |          3 |          7 |
+| c:\Files\RMS-site\backend\research\migrations\0001_initial.py                                                      | Python           |         41 |          1 |          7 |         49 |
+| c:\Files\RMS-site\backend\research\migrations\0002_alter_research_options_and_more.py                              | Python           |         25 |          1 |          6 |         32 |
+| c:\Files\RMS-site\backend\research\migrations\__init__.py                                                          | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\research\models.py                                                                       | Python           |         26 |          2 |          6 |         34 |
+| c:\Files\RMS-site\backend\research\tests.py                                                                        | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\research\views.py                                                                        | Python           |          1 |          1 |          2 |          4 |
+| c:\Files\RMS-site\backend\secret_lab\__init__.py                                                                   | Python           |          0 |          0 |          1 |          1 |
+| c:\Files\RMS-site\backend\secret_lab\asgi.py                                                                       | Python           |          4 |          8 |          5 |         17 |
+| c:\Files\RMS-site\backend\secret_lab\settings.py                                                                   | Python           |        106 |         22 |         35 |        163 |
+| c:\Files\RMS-site\backend\secret_lab\urls.py                                                                       | Python           |          9 |         16 |          2 |         27 |
+| c:\Files\RMS-site\backend\secret_lab\wsgi.py                                                                       | Python           |          4 |          8 |          5 |         17 |
+| Total                                                                                                              |                  |        861 |         94 |        231 |      1,186 |
++--------------------------------------------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
