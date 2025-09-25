@@ -2,7 +2,7 @@ from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Documentation
 from .serializers import DocumentSerializer
-from employees.api.permissions import ReadOnly
+from api.permissions import ReadOnly, HasRequiredClearanceLevel
 
 class DocumentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
@@ -13,7 +13,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         ).all()
     
     serializer_class = DocumentSerializer
-    permission_classes = [ReadOnly]
+    permission_classes = [HasRequiredClearanceLevel]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['type__name',

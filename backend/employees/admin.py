@@ -30,14 +30,14 @@ class PositionAdmin(admin.ModelAdmin):
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'position', 'division', 'clearance_level', 'get_cluster')
-    list_filter = ('clearance_level', 'division__department__cluster', 'position')
+    list_display = ('name', 'is_active', 'position', 'division', 'clearance_level', 'get_cluster')
+    list_filter = ('is_active', 'clearance_level', 'division__department__cluster', 'position')
     search_fields = ('name', 'user__username')
     readonly_fields = ('department', 'cluster')  # Вычисляемые поля только для чтения
     
     fieldsets = (
         (None, {
-            'fields': ('user', 'name', 'clearance_level')
+            'fields': ('user', 'name', 'is_active', 'clearance_level')
         }),
         ('Структура', {
             'fields': ('division', 'position', 'department', 'cluster')

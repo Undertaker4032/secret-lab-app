@@ -74,6 +74,7 @@ class Employee(models.Model):
     # Связь с моделью User для аутентификации
     user = models.OneToOneField(User, on_delete=models.CASCADE,verbose_name='Пользователь')
     name = models.CharField(max_length=100, verbose_name='Имя и Фамилия')
+    is_active = models.BooleanField(default=True, verbose_name='Сотрудник действующий?')
     clearance_level = models.ForeignKey(ClearanceLevel, null=True, on_delete=models.SET_NULL, verbose_name='Уровень Допуска')
     division = models.ForeignKey(Division, on_delete=models.PROTECT, verbose_name='Отдел')
 

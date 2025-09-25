@@ -2,7 +2,7 @@ from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Research
 from .serializers import ResearchSerializer
-from employees.api.permissions import ReadOnly
+from api.permissions import ReadOnly, HasRequiredClearanceLevel
 
 class ResearchViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
@@ -13,7 +13,7 @@ class ResearchViewSet(viewsets.ModelViewSet):
         ).prefetch_related('team').all()
     
     serializer_class = ResearchSerializer
-    permission_classes = [ReadOnly]
+    permission_classes = [HasRequiredClearanceLevel]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['lead__division__name',
