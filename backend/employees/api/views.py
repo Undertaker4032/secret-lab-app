@@ -7,6 +7,7 @@ from api.permissions import ReadOnly
 class EmployeeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Employee.objects.select_related(
+            'name',
             'user',
             'is_active',
             'clearance_level', 

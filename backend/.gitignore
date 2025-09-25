@@ -54,3 +54,6 @@ build/
 *.egg
 .coverage
 htmlcov/
+
+# Игнорирование VSCodeCounter
+.VSCodeCounter

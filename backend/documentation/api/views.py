@@ -7,6 +7,7 @@ from api.permissions import ReadOnly, HasRequiredClearanceLevel
 class DocumentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Documentation.objects.select_related(
+            'title',
             'author',
             'type',
             'required_clearance'

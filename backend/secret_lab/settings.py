@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt', # Simple JWT
     'django_filters', # Фильтр
     'corsheaders',
+    'drf_spectacular',
     'api',
     'employees',
     'documentation',
@@ -140,6 +141,8 @@ if not DEBUG:
 
 # Настройки REST Framework
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication', # JWT аутентификация
         'rest_framework.authentication.SessionAuthentication', # Сессионная аутентификация для браузера
@@ -160,4 +163,10 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React/Svelte dev server
     "http://127.0.0.1:3000",
+    "http://localhost:5173",  # Стандартный порт для Svelte dev-server
+    "http://127.0.0.1:5173",
+    "http://localhost:5000",  # Другие возможные порты
 ]
+
+# Разрешить передачу учетных данных
+CORS_ALLOW_CREDENTIALS = True

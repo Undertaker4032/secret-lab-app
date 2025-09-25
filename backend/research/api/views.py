@@ -7,6 +7,7 @@ from api.permissions import ReadOnly, HasRequiredClearanceLevel
 class ResearchViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Research.objects.select_related(
+            'title',
             'lead',
             'status',
             'required_clearance'
