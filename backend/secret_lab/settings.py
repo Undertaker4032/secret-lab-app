@@ -170,3 +170,76 @@ CORS_ALLOWED_ORIGINS = [
 
 # Разрешить передачу учетных данных
 CORS_ALLOW_CREDENTIALS = True
+
+# Логирование
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} | {levelname} | {name} | {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} | {message}',
+            'style': '{',
+        },
+    },
+    
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': 'django.log',
+        'maxBytes': 1024*1024*5,
+        'backupCount': 5,
+        'formatter': 'verbose',
+        'encoding': 'utf-8',
+    },
+        'file_errors': {
+            'class': 'logging.FileHandler',
+            'filename': 'errors.log',
+            'formatter': 'verbose',
+            'level': 'ERROR',
+            'encoding': 'utf-8',
+        },
+    },
+    
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'api': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'employees': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'documentation': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'research': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}

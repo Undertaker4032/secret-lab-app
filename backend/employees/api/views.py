@@ -3,13 +3,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Employee
 from .serializers import EmployeeSerializer
 from api.permissions import ReadOnly
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Employee.objects.select_related(
-            'name',
             'user',
-            'is_active',
             'clearance_level', 
             'division__department__cluster',
             'position' 
@@ -31,3 +33,14 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                        'name',
                        'clearance_level__number',
                        'division__department__cluster__name']
+    
+    def list(self, request, *args, **kwargs):
+        logger.info(f"Запрос списка сотрудников от пользователя: {request.user}")
+
+        try:
+            super().list(request, *args, **kwargs)
+            logger.debug(f"Успешно возвращено {len(super().list(request, *args, **kwargs).data)} сотрудников")
+            return super().list(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"Ошибка при получении списка сотрудников: {e}", exc_info=True)
+            raise
