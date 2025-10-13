@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Research
-from .serializers import ResearchSerializer
+from .serializers import ResearchListSerializer, ResearchObjectSerializer
 from api.permissions import ReadOnly, HasRequiredClearanceLevel
 import logging
 
@@ -14,9 +14,13 @@ class ResearchViewSet(viewsets.ModelViewSet):
             'lead',
             'status',
             'required_clearance'
-        ).prefetch_related('team').all()
+        ).prefetch_related('team').order_by('id')
     
-    serializer_class = ResearchSerializer
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ResearchListSerializer
+        return ResearchObjectSerializer
+    
     permission_classes = [HasRequiredClearanceLevel]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -43,17 +47,14 @@ class ResearchViewSet(viewsets.ModelViewSet):
         logger.info(f"Запрос списка исследований от пользователя: {request.user}")
 
         try:
-            super().list(request, *args, **kwargs)
-            logger.debug(f"Успешно возвращено {len(super().list(request, *args, **kwargs).data)} исследований")
-            return super().list(request, *args, **kwargs)
+            list = super().list(request, *args, **kwargs)
+            logger.debug(f"Успешно возвращено {len(list.data)} исследований")
+            return list
         except Exception as e:
             logger.error(f"Ошибка при получении исследований: {e}", exc_info=True)
             raise
 
     def retrieve(self, request, *args, **kwargs):
         logger.info(f"Запрос исследования '{self.get_object().title}' [ID:{self.get_object().id}] от пользователя {request.user}")
-
-        if not self.has_permission(request, instance):
-            logger.warning(f"Попытка несанкционированного доступа к исследованию '{self.get_object().title}' [ID:{self.get_object().id}] пользователем {request.user}")
 
         return super().retrieve(request, *args, **kwargs)

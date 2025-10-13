@@ -29,7 +29,7 @@ class Department(models.Model):
 # Модель Отдел
 class Division(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='divisions', verbose_name='Отделы')
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='divisions', verbose_name='Департаменты')
 
     class Meta:
         verbose_name = 'Отдел'

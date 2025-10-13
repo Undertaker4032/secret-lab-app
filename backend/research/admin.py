@@ -9,7 +9,7 @@ class ResearchStatusAdmin(admin.ModelAdmin):
 @admin.register(Research)
 class ResearchAdmin(admin.ModelAdmin):
     list_display = ('title', 'lead', 'status', 'created_date', 'required_clearance')
-    list_filter = ('status', 'created_date', 'required_clearance')
+    list_filter = ('lead', 'status', 'created_date', 'required_clearance')
     search_fields = ('title', 'description', 'objectives')
     readonly_fields = ('created_date', 'updated_date')
     filter_horizontal = ('team',)

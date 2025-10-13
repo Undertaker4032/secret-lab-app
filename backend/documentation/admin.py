@@ -9,7 +9,7 @@ class DocumentTypeAdmin(admin.ModelAdmin):
 @admin.register(Documentation)
 class DocumentationAdmin(admin.ModelAdmin):
     list_display = ('title', 'type', 'author', 'created_date', 'required_clearance')
-    list_filter = ('type', 'created_date', 'required_clearance')
+    list_filter = ('author', 'type', 'created_date', 'required_clearance')
     search_fields = ('title', 'content')
     readonly_fields = ('created_date', 'updated_date')
     date_hierarchy = 'created_date'

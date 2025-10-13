@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Documentation
-from .serializers import DocumentSerializer
+from .serializers import DocumentListSerializer, DocumentObjectSerializer
 from api.permissions import ReadOnly, HasRequiredClearanceLevel
 import logging
 
@@ -14,9 +14,13 @@ class DocumentViewSet(viewsets.ModelViewSet):
             'author',
             'type',
             'required_clearance'
-        ).all()
+        ).order_by('id')
     
-    serializer_class = DocumentSerializer
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return DocumentListSerializer
+        return DocumentObjectSerializer
+    
     permission_classes = [HasRequiredClearanceLevel]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -32,7 +36,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
     ordering_fields = ['title',
                        'author__division__name',
                        'type__name',
-                       'required_clearance__number'
+                       'required_clearance__number',
                        'created_date',
                        'updated_date']
     
@@ -40,17 +44,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
         logger.info(f"Запрос списка документов от пользователя: {request.user}")
 
         try:
-            super().list(request, *args, **kwargs)
-            logger.debug(f"Успешно возвращено {len(super().list(request, *args, **kwargs).data)} документов")
-            return super().list(request, *args, **kwargs)
+            list = super().list(request, *args, **kwargs)
+            logger.debug(f"Успешно возвращено {len(list.data)} документов")
+            return list
         except Exception as e:
             logger.error(f"Ошибка при получении документов: {e}", exc_info=True)
             raise
 
     def retrieve(self, request, *args, **kwargs):
         logger.info(f"Запрос документа '{self.get_object().title}' [ID:{self.get_object().id}] от пользователя {request.user}")
-
-        if not self.has_permission(request, instance):
-            logger.warning(f"Попытка несанкционированного доступа к документу '{self.get_object().title}' [ID:{self.get_object().id}] пользователем {request.user}")
 
         return super().retrieve(request, *args, **kwargs)

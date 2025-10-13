@@ -15,7 +15,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             'clearance_level', 
             'division__department__cluster',
             'position' 
-        ).all()
+        ).order_by('id')
     
     serializer_class = EmployeeSerializer
     permission_classes = [ReadOnly]
@@ -38,9 +38,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         logger.info(f"Запрос списка сотрудников от пользователя: {request.user}")
 
         try:
-            super().list(request, *args, **kwargs)
-            logger.debug(f"Успешно возвращено {len(super().list(request, *args, **kwargs).data)} сотрудников")
-            return super().list(request, *args, **kwargs)
+            list = super().list(request, *args, **kwargs)
+            logger.debug(f"Успешно возвращено {len(list.data)} сотрудников")
+            return list
         except Exception as e:
             logger.error(f"Ошибка при получении списка сотрудников: {e}", exc_info=True)
             raise

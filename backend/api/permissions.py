@@ -9,6 +9,9 @@ class ReadOnly(permissions.BasePermission):
         return request.method in permissions.SAFE_METHODS
     
 class HasRequiredClearanceLevel(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS
+
     def has_object_permission(self, request, view, obj):
         try:
             if request.method not in permissions.SAFE_METHODS:
@@ -38,8 +41,10 @@ class HasRequiredClearanceLevel(permissions.BasePermission):
 
             if not has_access:
                 logger.warning(f"Пользователь {request.user} с уровнем {user_clearance_number} пытается получить доступ к объекту уровня {required_clearance_number}")
+                return False
             
             return has_access
     
         except Exception as e:
             logger.error(f"Ошибка проверки уровня допуска {e}", exc_info=True)
+            return False
