@@ -10,7 +10,9 @@ class ReadOnly(permissions.BasePermission):
     
 class HasRequiredClearanceLevel(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return False
 
     def has_object_permission(self, request, view, obj):
         try:

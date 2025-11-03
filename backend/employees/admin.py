@@ -1,57 +1,76 @@
 from django.contrib import admin
 from .models import Cluster, Department, Division, Position, ClearanceLevel, Employee
 
-# Простые модели без настроек
-admin.site.register(Cluster)
-admin.site.register(ClearanceLevel)
+@admin.register(Cluster)
+class ClusterAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
 
-# Классы для более сложных моделей с настройками
+@admin.register(ClearanceLevel)
+class ClearanceLevelAdmin(admin.ModelAdmin):
+    list_display = ('number', 'name')
+    search_fields = ('number',)
+    ordering = ('number',)
+
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'cluster')  # Поля, отображаемые в списке
-    list_filter = ('cluster',)  # Фильтр по кластерам
-    search_fields = ('name',)  # Поиск по названию
+    list_display = ('name', 'cluster')
+    list_filter = ('cluster',)
+    search_fields = ('name', 'cluster__name')
+    list_select_related = ('cluster',)
 
 @admin.register(Division)
 class DivisionAdmin(admin.ModelAdmin):
     list_display = ('name', 'department', 'get_cluster')
     list_filter = ('department__cluster', 'department')
-    search_fields = ('name', 'department__name')
+    search_fields = ('name', 'department__name', 'department__cluster__name')
+    list_select_related = ('department__cluster',)
     
     def get_cluster(self, obj):
         return obj.department.cluster
     get_cluster.short_description = 'Кластер'
+    get_cluster.admin_order_field = 'department__cluster'
 
 @admin.register(Position)
 class PositionAdmin(admin.ModelAdmin):
     list_display = ('name', 'cluster')
     list_filter = ('cluster',)
-    search_fields = ('name',)
+    search_fields = ('name', 'cluster__name')
+    list_select_related = ('cluster',)
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_active', 'position', 'division', 'clearance_level', 'get_cluster')
-    list_filter = ('is_active', 'clearance_level', 'division__department__cluster', 'position')
-    search_fields = ('name', 'user__username')
-    readonly_fields = ('department', 'cluster')  # Вычисляемые поля только для чтения
+    list_display = ('id', 'name', 'is_active', 'position', 'division', 'clearance_level', 'get_cluster')
+    list_filter = ('is_active', 'clearance_level', 'division__department__cluster', 'position', 'division')
+    search_fields = ('name', 'user__username', 'division__name')
+    readonly_fields = ('get_department', 'get_cluster')
+    list_select_related = ('position', 'division__department__cluster', 'clearance_level')
     
     fieldsets = (
         (None, {
             'fields': ('user', 'name', 'is_active', 'clearance_level')
         }),
         ('Структура', {
-            'fields': ('division', 'position', 'department', 'cluster')
+            'fields': ('division', 'position', 'get_department', 'get_cluster')
         }),
         ('Дополнительно', {
             'fields': ('profile_picture',),
-            'classes': ('collapse',)  # Сворачиваемый блок
+            'classes': ('collapse',)
         }),
     )
     
     def get_cluster(self, obj):
         return obj.cluster
     get_cluster.short_description = 'Кластер'
+    get_cluster.admin_order_field = 'division__department__cluster'
     
-    def department(self, obj):
+    def get_department(self, obj):
         return obj.department
-    department.short_description = 'Департамент'
+    get_department.short_description = 'Департамент'
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'division__department__cluster',
+            'position',
+            'clearance_level'
+        )

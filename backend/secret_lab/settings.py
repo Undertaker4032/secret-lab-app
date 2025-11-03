@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt', # Simple JWT
+    'rest_framework_simplejwt.token_blacklist',
     'django_filters', # Фильтр
     'corsheaders',
     'drf_spectacular',
@@ -147,16 +148,16 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication', # JWT аутентификация
         'rest_framework.authentication.SessionAuthentication', # Сессионная аутентификация для браузера
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly', # Разрешения по умолчанию
-    ),
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticatedOrReadOnly', # Разрешения по умолчанию
+    # ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend', # Фильтрация
         'rest_framework.filters.SearchFilter', # Поиск
         'rest_framework.filters.OrderingFilter', # Сортировка
     ),
-    #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # Пагинация на будущее
-    #'PAGE_SIZE': 10,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # Пагинация на будущее
+    'PAGE_SIZE': 20,
 }
 
 # Настройки CORS
@@ -179,12 +180,11 @@ LOGGING = {
     
     'formatters': {
         'verbose': {
-            'format': '{asctime} | {levelname} | {name} | {message}',
+            'format': '{asctime} | {levelname:8} | {name} | {message}',
             'style': '{',
         },
-        'simple': {
-            'format': '{levelname} | {message}',
-            'style': '{',
+        'json': {
+            'format': '{"timestamp": "%(asctime)s", "level": "%(levelname)s", "logger": "%(name)s", "message": "%(message)s"}',
         },
     },
     
@@ -193,26 +193,36 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'file': {
-        'class': 'logging.handlers.RotatingFileHandler',
-        'filename': 'django.log',
-        'maxBytes': 1024*1024*5,
-        'backupCount': 5,
-        'formatter': 'verbose',
-        'encoding': 'utf-8',
-    },
+        'file_app': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/app.log',
+            'maxBytes': 1024*1024*10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
         'file_errors': {
-            'class': 'logging.FileHandler',
-            'filename': 'errors.log',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/errors.log',
+            'maxBytes': 1024*1024*10,
+            'backupCount': 5,
             'formatter': 'verbose',
             'level': 'ERROR',
+            'encoding': 'utf-8',
+        },
+        'file_security': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/security.log',
+            'maxBytes': 1024*1024*10,
+            'backupCount': 5,
+            'formatter': 'verbose',
             'encoding': 'utf-8',
         },
     },
     
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file_app'],
             'level': 'INFO',
             'propagate': False,
         },
@@ -222,24 +232,62 @@ LOGGING = {
             'propagate': False,
         },
         'api': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'handlers': ['console', 'file_app'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'auth': {
+            'handlers': ['console', 'file_security'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'security': {
+            'handlers': ['file_security'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'data': {
+            'handlers': ['console', 'file_app'],
+            'level': 'INFO',
             'propagate': False,
         },
         'employees': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'handlers': ['console', 'file_app'],
+            'level': 'INFO',
             'propagate': False,
         },
         'documentation': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'handlers': ['console', 'file_app'],
+            'level': 'INFO',
             'propagate': False,
         },
         'research': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
+            'handlers': ['console', 'file_app'],
+            'level': 'INFO',
             'propagate': False,
         },
     },
+}
+
+import os
+os.makedirs('logs', exist_ok=True)
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'AUTH_COOKIE': 'access_token',
+    'AUTH_COOKIE_SECURE': True,
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_SAMESITE': 'Lax',
 }

@@ -8,12 +8,13 @@ class ResearchStatusAdmin(admin.ModelAdmin):
 
 @admin.register(Research)
 class ResearchAdmin(admin.ModelAdmin):
-    list_display = ('title', 'lead', 'status', 'created_date', 'required_clearance')
-    list_filter = ('lead', 'status', 'created_date', 'required_clearance')
-    search_fields = ('title', 'description', 'objectives')
+    list_display = ('id', 'title', 'lead', 'status', 'created_date', 'required_clearance')
+    list_filter = ('status', 'created_date', 'required_clearance', 'lead')
+    search_fields = ('title', 'description', 'objectives', 'lead__name')
     readonly_fields = ('created_date', 'updated_date')
     filter_horizontal = ('team',)
     date_hierarchy = 'created_date'
+    list_select_related = ('lead', 'status', 'required_clearance')
     
     fieldsets = (
         (None, {
@@ -30,3 +31,8 @@ class ResearchAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'lead', 'status', 'required_clearance'
+        ).prefetch_related('team')

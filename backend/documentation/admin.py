@@ -8,11 +8,12 @@ class DocumentTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Documentation)
 class DocumentationAdmin(admin.ModelAdmin):
-    list_display = ('title', 'type', 'author', 'created_date', 'required_clearance')
-    list_filter = ('author', 'type', 'created_date', 'required_clearance')
-    search_fields = ('title', 'content')
+    list_display = ('id', 'title', 'type', 'author', 'created_date', 'required_clearance')
+    list_filter = ('type', 'created_date', 'required_clearance', 'author')
+    search_fields = ('title', 'content', 'author__name')
     readonly_fields = ('created_date', 'updated_date')
     date_hierarchy = 'created_date'
+    list_select_related = ('type', 'author', 'required_clearance')
     
     fieldsets = (
         (None, {
@@ -26,3 +27,8 @@ class DocumentationAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'type', 'author', 'required_clearance'
+        )

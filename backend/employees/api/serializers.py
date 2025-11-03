@@ -9,22 +9,22 @@ class ClusterSerializer(serializers.ModelSerializer):
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ['id', 'name', 'cluster']
+        fields = ['id', 'name']
 
 class DivisionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Division
-        fields = ['id', 'name', 'department']
+        fields = ['id', 'name']
 
 class PositionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Position
-        fields = ['id', 'name', 'cluster']
+        fields = ['id', 'name']
 
 class ClearanceLevelSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClearanceLevel
-        fields = ['id', 'number']
+        fields = ['id', 'name', 'number']
 
 class EmployeeSerializer(serializers.ModelSerializer):
     clearance_level = ClearanceLevelSerializer(read_only=True)
