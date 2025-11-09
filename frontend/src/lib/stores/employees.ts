@@ -1,5 +1,6 @@
-import { writable, derived, get } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 import { api } from '$lib/utils/api';
+import { cleanFilters, buildUrlWithFilters } from '$lib/utils/apiFilters';
 import type { Employee, EmployeesResponse, EmployeesFilters } from '$lib/utils/employee';
 
 // Хранилища
@@ -18,29 +19,16 @@ export const inactiveEmployees = derived(employees, $employees =>
   $employees.filter(emp => !emp.is_active)
 );
 
-// Функции
+// Основная функция загрузки сотрудников
 export async function fetchEmployees(filters: EmployeesFilters = {}) {
   employeesLoading.set(true);
   employeesError.set(null);
   
   try {
-    // Строим query string из фильтров
-    const params = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        // Убедимся, что это не системные свойства (как isTrusted)
-        if (key !== 'isTrusted' && typeof value !== 'boolean') {
-          params.append(key, value.toString());
-        }
-      }
-    });
-    
-    const queryString = params.toString();
-    const url = queryString ? `/api/employees/?${queryString}` : '/api/employees/';
+    // Используем нашу утилиту для построения URL
+    const url = buildUrlWithFilters('/api/employees/', filters);
     
     console.log('Fetching employees from:', url);
-    
     const data = await api.get<EmployeesResponse>(url);
     
     employees.set(data.results);
@@ -56,23 +44,26 @@ export async function fetchEmployees(filters: EmployeesFilters = {}) {
   }
 }
 
+// Функция обновления фильтров
 export function updateFilters(newFilters: Partial<EmployeesFilters>) {
-  // Очищаем фильтры от системных свойств
-  const cleanFilters: EmployeesFilters = {};
+  const currentFilters = get(employeesFilters);
+  const mergedFilters = { ...currentFilters, ...cleanFilters(newFilters) };
   
-  Object.entries(newFilters).forEach(([key, value]) => {
-    if (key !== 'isTrusted' && value !== undefined && value !== null && value !== '') {
-      cleanFilters[key as keyof EmployeesFilters] = value;
-    }
-  });
-  
-  employeesFilters.update(current => ({ ...current, ...cleanFilters }));
-  fetchEmployees(cleanFilters);
+  employeesFilters.set(mergedFilters);
+  fetchEmployees(mergedFilters);
 }
 
+// Функция сброса фильтров
 export function clearFilters() {
   employeesFilters.set({});
   fetchEmployees();
+}
+
+// Вспомогательная функция для получения текущего значения store
+function get(store: any) {
+  let value: any;
+  store.subscribe((v: any) => value = v)();
+  return value;
 }
 
 // Инициализация

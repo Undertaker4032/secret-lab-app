@@ -22,9 +22,14 @@ class PositionSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class ClearanceLevelSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    def get_name(self, obj) -> str:
+        return obj.name
+
     class Meta:
         model = ClearanceLevel
-        fields = ['id', 'name', 'number']
+        fields = '__all__'
 
 class EmployeeSerializer(serializers.ModelSerializer):
     clearance_level = ClearanceLevelSerializer(read_only=True)
@@ -39,3 +44,10 @@ class EmployeeSerializer(serializers.ModelSerializer):
                   'clearance_level', 'cluster',
                   'department', 'division',
                   'position', 'profile_picture']
+        
+class EmployeeFilterSerializer(serializers.Serializer):
+    clusters = ClusterSerializer(many=True, read_only=True)
+    departments = DepartmentSerializer(many=True, read_only=True)
+    divisions = DivisionSerializer(many=True, read_only=True)
+    positions = PositionSerializer(many=True, read_only=True)
+    clearance_levels = ClearanceLevelSerializer(many=True, read_only=True)

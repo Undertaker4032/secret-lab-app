@@ -1,5 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import { api } from '$lib/utils/api';
+import { cleanFilters, buildUrlWithFilters } from '$lib/utils/apiFilters';
 import type { Documentation, DocumentationResponse, DocumentationFilters } from '$lib/utils/documentation';
 
 // Хранилища
@@ -9,22 +10,13 @@ export const documentationError = writable<string | null>(null);
 export const documentationFilters = writable<DocumentationFilters>({});
 export const documentationCount = writable<number>(0);
 
-// Обновляем функцию fetchDocumentation для поддержки всех фильтров
+// Основная функция загрузки документации
 export async function fetchDocumentation(filters: DocumentationFilters = {}) {
   documentationLoading.set(true);
   documentationError.set(null);
   
   try {
-    const params = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, value.toString());
-      }
-    });
-    
-    const queryString = params.toString();
-    const url = queryString ? `/api/documentation/?${queryString}` : '/api/documentation/';
+    const url = buildUrlWithFilters('/api/documentation/', filters);
     
     console.log('Fetching documentation from:', url);
     const data = await api.get<DocumentationResponse>(url);
@@ -42,21 +34,23 @@ export async function fetchDocumentation(filters: DocumentationFilters = {}) {
   }
 }
 
-// Обновляем функцию updateFilters
+// Функция обновления фильтров
 export function updateDocumentationFilters(newFilters: Partial<DocumentationFilters>) {
-  const cleanFilters: DocumentationFilters = {};
+  const currentFilters = get(documentationFilters);
+  const mergedFilters = { ...currentFilters, ...cleanFilters(newFilters) };
   
-  Object.entries(newFilters).forEach(([key, value]) => {
-    if (key !== 'isTrusted' && value !== undefined && value !== null && value !== '') {
-      cleanFilters[key as keyof DocumentationFilters] = value;
-    }
-  });
-  
-  documentationFilters.update(current => ({ ...current, ...cleanFilters }));
-  fetchDocumentation(cleanFilters);
+  documentationFilters.set(mergedFilters);
+  fetchDocumentation(mergedFilters);
 }
 
+// Функция сброса фильтров
 export function clearDocumentationFilters() {
   documentationFilters.set({});
   fetchDocumentation();
+}
+
+function get(store: any) {
+  let value: any;
+  store.subscribe((v: any) => value = v)();
+  return value;
 }

@@ -4,7 +4,7 @@
   import avatar from "$lib/assets/avatar.svg";
   import { isAuthenticated, user, employee } from '$lib/stores/auth';
   import { api } from '$lib/utils/api';
-  import LoginModal from '$lib/components/LoginModal.svelte';
+  import LoginModal from '$lib/components/ui/LoginModal.svelte';
   import { fade, fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // utils/api.ts
 import { 
   accessToken, 
@@ -8,11 +9,29 @@ import {
   authLoading 
 } from '$lib/stores/auth';
 import type { Employee, AuthTokens, LoginResponse, User } from '$lib/stores/auth'; 
-import type { EmployeesFilters, EmployeesResponse } from './employee';
+import type { 
+  EmployeesFilters, 
+  EmployeesResponse,
+  Cluster,
+  Department, 
+  Division,
+  Position,
+  ClearanceLevel
+} from './employee';
 import type { DocumentationFilters, DocumentationResponse } from './documentation';
 import type { ResearchFilters, ResearchResponse} from './research';
 import type { DocumentObject } from './documentObject';
 import type { ResearchObject } from './researchObject';
+
+
+export interface EmployeeFiltersData {
+  clusters: Cluster[];
+  departments: Department[];
+  divisions: Division[];
+  positions: Position[];
+  clearance_levels: ClearanceLevel[];
+}
+
 
 
 const API_BASE = 'http://localhost:8000';
@@ -257,6 +276,34 @@ async getDocumentationObject(id: number): Promise<DocumentObject> {
 
 async getResearchObject(id: number): Promise<ResearchObject> {
   return await this.get<ResearchObject>(`/api/research/${id}/`);
+},
+
+async getDocumentTypes(): Promise<any[]> {
+  return await this.get<any[]>('/api/document-types/');
+},
+
+async getResearchStatuses(): Promise<any[]> {
+  return await this.get<any[]>('/api/research-statuses/');
+},
+
+async getClearanceLevels(): Promise<any[]> {
+  return await this.get<any[]>('/api/clearance-levels/');
+},
+
+async getClusters(): Promise<any[]> {
+  return await this.get<any[]>('/api/clusters/');
+},
+
+async getDepartments(): Promise<any[]> {
+  return await this.get<any[]>('/api/departments/');
+},
+
+async getDivisions(): Promise<any[]> {
+  return await this.get<any[]>('/api/divisions/');
+},
+
+async getEmployeeFilters(): Promise<EmployeeFiltersData> {
+  return await this.get<EmployeeFiltersData>('/api/employees/employee-filters/');
 },
 };
 

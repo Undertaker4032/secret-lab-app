@@ -1,5 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import { api } from '$lib/utils/api';
+import { cleanFilters, buildUrlWithFilters } from '$lib/utils/apiFilters';
 import type { Research, ResearchResponse, ResearchFilters } from '$lib/utils/research';
 
 // Хранилища
@@ -9,22 +10,13 @@ export const researchError = writable<string | null>(null);
 export const researchFilters = writable<ResearchFilters>({});
 export const researchCount = writable<number>(0);
 
-// Обновляем функцию fetchResearch для поддержки всех фильтров
+// Основная функция загрузки исследований
 export async function fetchResearch(filters: ResearchFilters = {}) {
   researchLoading.set(true);
   researchError.set(null);
   
   try {
-    const params = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, value.toString());
-      }
-    });
-    
-    const queryString = params.toString();
-    const url = queryString ? `/api/research/?${queryString}` : '/api/research/';
+    const url = buildUrlWithFilters('/api/research/', filters);
     
     console.log('Fetching research from:', url);
     const data = await api.get<ResearchResponse>(url);
@@ -42,21 +34,23 @@ export async function fetchResearch(filters: ResearchFilters = {}) {
   }
 }
 
-// Обновляем функцию updateFilters
+// Функция обновления фильтров
 export function updateResearchFilters(newFilters: Partial<ResearchFilters>) {
-  const cleanFilters: ResearchFilters = {};
+  const currentFilters = get(researchFilters);
+  const mergedFilters = { ...currentFilters, ...cleanFilters(newFilters) };
   
-  Object.entries(newFilters).forEach(([key, value]) => {
-    if (key !== 'isTrusted' && value !== undefined && value !== null && value !== '') {
-      cleanFilters[key as keyof ResearchFilters] = value;
-    }
-  });
-  
-  researchFilters.update(current => ({ ...current, ...cleanFilters }));
-  fetchResearch(cleanFilters);
+  researchFilters.set(mergedFilters);
+  fetchResearch(mergedFilters);
 }
 
+// Функция сброса фильтров
 export function clearResearchFilters() {
   researchFilters.set({});
   fetchResearch();
+}
+
+function get(store: any) {
+  let value: any;
+  store.subscribe((v: any) => value = v)();
+  return value;
 }

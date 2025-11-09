@@ -1,8 +1,7 @@
 from rest_framework import permissions
 import logging
 
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('api.security')
 
 class ReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -23,30 +22,40 @@ class HasRequiredClearanceLevel(permissions.BasePermission):
 
             if required_clearance is None:
                 return True
-            
-            required_clearance_number = required_clearance.number
 
-            if required_clearance_number <= 1:
+            if required_clearance.number <= 1:
                 return True
             
             if not request.user.is_authenticated:
-                logger.warning(f"Анонимный пользователь пытается получить доступ к объекту {required_clearance}")
+                logger.warning(f"Анонимный пользователь пытается получить доступ к объекту {required_clearance}",
+                               extra={'action': 'clearance_denied',
+                                      'user': None,
+                                      'required_clearance': required_clearance.number})
                 return False
             
             try:
-                user_clearance = request.user.employee.clearance_level
-                user_clearance_number = user_clearance.number
+                user = request.user
+                username = user.username
+                user_clearance = user.employee.clearance_level
             except AttributeError:
+                logger.warning(f"Пользователь {username} не имеет профиля сотрудника",
+                               extra={'user': user})
                 return False
             
-            has_access = user_clearance_number >= required_clearance_number
+            has_access = user_clearance.number >= required_clearance.number
 
             if not has_access:
-                logger.warning(f"Пользователь {request.user} с уровнем {user_clearance_number} пытается получить доступ к объекту уровня {required_clearance_number}")
+                logger.warning(f"Недостаточный У.Д: пользователь {username} с {user_clearance.name} пытается получить доступ к объекту {required_clearance.name}",
+                               extra={'action': 'clearance_denied',
+                                      'user': user,
+                                      'user_clearance': user_clearance.number,
+                                      'required_clearance': required_clearance.number})
                 return False
             
             return has_access
     
         except Exception as e:
-            logger.error(f"Ошибка проверки уровня допуска {e}", exc_info=True)
+            logger.error(f"Ошибка проверки уровня допуска {str(e)}",
+                         extra={'user': user if request.user.is_authenticated else None},
+                         exc_info=True)
             return False

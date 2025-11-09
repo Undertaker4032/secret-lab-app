@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { researchSortOptions } from '$lib/utils/research';
+  import { cleanFilters } from '$lib/utils/apiFilters';
 
   const dispatch = createEventDispatcher();
 
@@ -12,14 +13,14 @@
   let selectedSort = '';
 
   function handleSubmit() {
-    const filters = {
-      search: searchTerm || undefined,
-      status__name: selectedStatus || undefined,
-      lead__division__name: selectedDivision || undefined,
-      required_clearance__number: selectedClearance || undefined,
-      created_date: selectedDate || undefined,
-      ordering: selectedSort || undefined
-    };
+    const filters = cleanFilters({
+      search: searchTerm,
+      status__name: selectedStatus,
+      lead__division__name: selectedDivision,
+      required_clearance__number: selectedClearance,
+      created_date: selectedDate,
+      ordering: selectedSort
+    });
     
     console.log('Applying research filters:', filters);
     dispatch('filterChange', filters);
@@ -45,7 +46,7 @@
   ];
 
   const clearanceLevels = [
-    { value: '6', label: '5-У.Д.' },
+    { value: '6', label: '6-У.Д.' },
     { value: '5', label: '5-У.Д.' },
     { value: '4', label: '4-У.Д.' },
     { value: '3', label: '3-У.Д.' },

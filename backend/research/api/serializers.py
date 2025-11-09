@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Research
+from ..models import Research, ResearchStatus
 
 
 class ResearchListSerializer(serializers.ModelSerializer):
@@ -37,3 +37,8 @@ class ResearchObjectSerializer(serializers.ModelSerializer):
 
     def get_team_members(self, obj):
         return [employee.name for employee in obj.team.all()]
+    
+class ResearchStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResearchStatus
+        fields = ['id', 'name']

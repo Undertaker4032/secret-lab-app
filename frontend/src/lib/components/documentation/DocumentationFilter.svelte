@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { documentationSortOptions } from '$lib/utils/documentation';
+  import { cleanFilters } from '$lib/utils/apiFilters';
 
   const dispatch = createEventDispatcher();
 
@@ -12,14 +13,14 @@
   let selectedSort = '';
 
   function handleSubmit() {
-    const filters = {
-      search: searchTerm || undefined,
-      type__name: selectedType || undefined,
-      author__division__name: selectedDivision || undefined,
-      required_clearance__number: selectedClearance || undefined,
-      created_date: selectedDate || undefined,
-      ordering: selectedSort || undefined
-    };
+    const filters = cleanFilters({
+      search: searchTerm,
+      type__name: selectedType,
+      author__division__name: selectedDivision,
+      required_clearance__number: selectedClearance,
+      created_date: selectedDate,
+      ordering: selectedSort
+    });
     
     console.log('Applying documentation filters:', filters);
     dispatch('filterChange', filters);
@@ -46,7 +47,7 @@
   ];
 
   const clearanceLevels = [
-    { value: '6', label: '5-У.Д.' },
+    { value: '6', label: '6-У.Д.' },
     { value: '5', label: '5-У.Д.' },
     { value: '4', label: '4-У.Д.' },
     { value: '3', label: '3-У.Д.' },

@@ -1,19 +1,25 @@
+# backend\api\exceptions.py
+import logging
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 from rest_framework import status
-from secret_lab import settings
-import logging
+from django.conf import settings
 
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('api')
 
 def custom_exception_handler(exc, context):
-    # Стандартный обработчик DRF
+    # Получаем стандартный response
     response = exception_handler(exc, context)
+    request = context.get('request')
     
     # Если DRF не обработал исключение
     if response is None:
-        logger.error(f"Необработанное исключение: {exc}", exc_info=True)
+        user_info = f"user:{request.user.username}" if request and request.user.is_authenticated else "user:anonymous"
+        logger.error(
+            f"Необработанное исключение: {exc} | {user_info}",
+            exc_info=True,
+            extra={'user': request.user if request and request.user.is_authenticated else None}
+        )
         
         # Показ деталей в debug режиме
         if settings.DEBUG:
@@ -30,7 +36,15 @@ def custom_exception_handler(exc, context):
                 'message': 'Внутренняя ошибка сервера'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    # Обработка ошибок DRF
+    user_info = f"user:{request.user.username}" if request and request.user.is_authenticated else "user:anonymous"
+    logger.warning(
+        f"Обработанное исключение: {response.status_code} - {exc} | {user_info}",
+        extra={
+            'user': request.user if request and request.user.is_authenticated else None,
+            'status_code': response.status_code
+        }
+    )
+    
     error_data = {
         'error': True,
         'type': 'validation_error',
@@ -52,7 +66,6 @@ def custom_exception_handler(exc, context):
         error_data['type'] = 'permission_error'
         error_data['message'] = 'Недостаточно прав для выполнения действия'
         
-        request = context.get('request')
         if request and hasattr(request, 'user') and request.user.is_authenticated:
             try:
                 user_clearance = request.user.employee.clearance_level.number
@@ -60,8 +73,8 @@ def custom_exception_handler(exc, context):
                     'user_clearance': user_clearance,
                     'required_clearance': 'недостаточно'
                 }
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"Ошибка получения уровня доступа: {e}")
                 
     elif response.status_code == status.HTTP_404_NOT_FOUND:
         error_data['type'] = 'not_found'

@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'api.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'secret_lab.urls'
@@ -158,6 +159,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # Пагинация на будущее
     'PAGE_SIZE': 20,
+    
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
 }
 
 # Настройки CORS
@@ -180,44 +183,60 @@ LOGGING = {
     
     'formatters': {
         'verbose': {
-            'format': '{asctime} | {levelname:8} | {name} | {message}',
+            'format': '{asctime} | {levelname:8} | {name} | {module}:{funcName}:{lineno} | {message}',
             'style': '{',
         },
-        'json': {
-            'format': '{"timestamp": "%(asctime)s", "level": "%(levelname)s", "logger": "%(name)s", "message": "%(message)s"}',
+        'simple': {
+            'format': '{asctime} | {levelname:8} | {message}',
+            'style': '{',
+        },
+        'files': {
+            '()': 'api.log_formatters.ExtraFormatter',
+            'format': '{asctime} | {levelname:8} | {name} | {module}:{funcName}:{lineno} | {message}',
+            'style': '{',
+        },
+    },
+    
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
         },
     },
     
     'handlers': {
         'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
         'file_app': {
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/app.log',
-            'maxBytes': 1024*1024*10,  # 10 MB
+            'maxBytes': 1024*1024*10,
             'backupCount': 5,
-            'formatter': 'verbose',
+            'formatter': 'files',
             'encoding': 'utf-8',
         },
         'file_errors': {
+            'level': 'WARNING',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/errors.log',
             'maxBytes': 1024*1024*10,
             'backupCount': 5,
-            'formatter': 'verbose',
-            'level': 'ERROR',
+            'formatter': 'files',
             'encoding': 'utf-8',
         },
         'file_security': {
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/security.log',
             'maxBytes': 1024*1024*10,
             'backupCount': 5,
-            'formatter': 'verbose',
+            'formatter': 'files',
             'encoding': 'utf-8',
-        },
+        }
     },
     
     'loggers': {
@@ -231,24 +250,30 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
+        'django.security': {
+            'handlers': ['file_security'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        # Кастомные логгеры
         'api': {
             'handlers': ['console', 'file_app'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
-        'auth': {
+        'api.auth': {
             'handlers': ['console', 'file_security'],
             'level': 'INFO',
             'propagate': False,
         },
-        'security': {
-            'handlers': ['file_security'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-        'data': {
+        'api.data': {
             'handlers': ['console', 'file_app'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        'api.security': {
+            'handlers': ['file_security'],
+            'level': 'WARNING',
             'propagate': False,
         },
         'employees': {
@@ -268,6 +293,7 @@ LOGGING = {
         },
     },
 }
+
 
 import os
 os.makedirs('logs', exist_ok=True)

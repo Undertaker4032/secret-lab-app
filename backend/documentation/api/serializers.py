@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Documentation
+from ..models import Documentation, DocumentType
 
 
 class DocumentListSerializer(serializers.ModelSerializer):
@@ -31,3 +31,8 @@ class DocumentObjectSerializer(serializers.ModelSerializer):
                   'updated_date', 'required_clearance',
                   'required_clearance_name']
     read_only_fields = ['created_date', 'updated_date']
+
+class DocumentTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentType
+        fields = ['id', 'name']

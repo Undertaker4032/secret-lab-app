@@ -45,10 +45,10 @@ export interface EmployeesResponse {
 
 export interface EmployeesFilters {
   is_active?: string;
-  cluster?: string;
-  department?: string;
-  division?: string;
-  clearance_level__number?: string;
+  cluster?: string | number;
+  department?: string | number;
+  division?: string | number;
+  clearance_level?: string | number;
   search?: string;
   ordering?: string;
 }
