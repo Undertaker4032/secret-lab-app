@@ -3,11 +3,32 @@ export interface DocumentType {
   name: string;
 }
 
+export interface ClearanceLevel {
+  id: number;
+  name: string;
+  number: number;
+}
+
+export interface DocumentTypesResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: DocumentType[];
+}
+
+export interface ClearanceLevelsResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ClearanceLevel[];
+}
+
 export interface Documentation {
   id: number;
   title: string;
   type: number;
   type_name: string;
+  content: string;
   author: number;
   author_name: string;
   created_date: string;

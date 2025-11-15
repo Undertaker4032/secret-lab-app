@@ -15,7 +15,6 @@
   let activeStatus = '';
   let selectedSort = '';
 
-  // Данные для фильтров
   let filtersData: EmployeeFiltersData = {
     clusters: [],
     departments: [],
@@ -40,14 +39,13 @@
     const filters = cleanFilters({
       search: searchTerm,
       is_active: activeStatus,
-      cluster: selectedCluster, // Теперь передаем ID вместо name
+      cluster: selectedCluster,
       department: selectedDepartment,
       division: selectedDivision,
-      clearance_level: selectedClearance, // Теперь передаем ID вместо number
+      clearance_level: selectedClearance,
       ordering: selectedSort
     });
     
-    console.log('Applying filters:', filters);
     dispatch('filterChange', filters);
   }
 
@@ -65,7 +63,7 @@
 </script>
 
 <div class="bg-rms-cod-gray p-6 rounded-lg border border-rms-mine-shaft">
-  <h3 class="text-lg font-medium text-rms-white mb-6">Фильтры сотрудников</h3>
+  <h3 class="text-lg font-semibold text-rms-white mb-6">Фильтры сотрудников</h3>
   
   {#if isLoading}
     <div class="text-center py-4">
@@ -73,9 +71,7 @@
     </div>
   {:else}
     <form on:submit|preventDefault={handleSubmit}>
-      <!-- Первая строка: Поиск и сортировка -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <!-- Поиск -->
         <div class="space-y-2">
           <label for="search" class="block text-sm font-medium text-rms-white">
             Поиск по имени
@@ -85,11 +81,10 @@
             type="text"
             bind:value={searchTerm}
             placeholder="Введите имя сотрудника..."
-            class="w-full px-3 py-2 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white placeholder-rms-dove-gray focus:outline-none focus:ring-2 focus:ring-rms-white focus:border-rms-white transition-colors"
+            class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white placeholder-rms-dove-gray focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
           />
         </div>
 
-        <!-- Сортировка -->
         <div class="space-y-2">
           <label for="sort" class="block text-sm font-medium text-rms-white">
             Сортировка
@@ -97,7 +92,7 @@
           <select
             id="sort"
             bind:value={selectedSort}
-            class="w-full px-3 py-2 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white focus:border-rms-white transition-colors"
+            class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
           >
             <option value="">Без сортировки</option>
             {#each employeeSortOptions as option}
@@ -107,9 +102,7 @@
         </div>
       </div>
 
-      <!-- Вторая строка: Статус и уровень допуска -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <!-- Статус -->
         <div class="space-y-2">
           <label for="status" class="block text-sm font-medium text-rms-white">
             Статус
@@ -117,7 +110,7 @@
           <select
             id="status"
             bind:value={activeStatus}
-            class="w-full px-3 py-2 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white focus:border-rms-white transition-colors"
+            class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
           >
             <option value="">Все сотрудники</option>
             <option value="true">Только активные</option>
@@ -125,7 +118,6 @@
           </select>
         </div>
 
-        <!-- Уровень допуска -->
         <div class="space-y-2">
           <label for="clearance" class="block text-sm font-medium text-rms-white">
             Уровень допуска
@@ -133,7 +125,7 @@
           <select
             id="clearance"
             bind:value={selectedClearance}
-            class="w-full px-3 py-2 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white focus:border-rms-white transition-colors"
+            class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
           >
             <option value="">Все уровни</option>
             {#each filtersData.clearance_levels as level}
@@ -143,9 +135,7 @@
         </div>
       </div>
 
-      <!-- Третья строка: Кластер, Департамент, Отдел -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <!-- Кластер -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="space-y-2">
           <label for="cluster" class="block text-sm font-medium text-rms-white">
             Кластер
@@ -153,7 +143,7 @@
           <select
             id="cluster"
             bind:value={selectedCluster}
-            class="w-full px-3 py-2 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white focus:border-rms-white transition-colors"
+            class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
           >
             <option value="">Все кластеры</option>
             {#each filtersData.clusters as cluster}
@@ -162,7 +152,6 @@
           </select>
         </div>
 
-        <!-- Департамент -->
         <div class="space-y-2">
           <label for="department" class="block text-sm font-medium text-rms-white">
             Департамент
@@ -170,7 +159,7 @@
           <select
             id="department"
             bind:value={selectedDepartment}
-            class="w-full px-3 py-2 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white focus:border-rms-white transition-colors"
+            class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
           >
             <option value="">Все департаменты</option>
             {#each filtersData.departments as department}
@@ -179,7 +168,6 @@
           </select>
         </div>
 
-        <!-- Отдел -->
         <div class="space-y-2">
           <label for="division" class="block text-sm font-medium text-rms-white">
             Отдел
@@ -187,7 +175,7 @@
           <select
             id="division"
             bind:value={selectedDivision}
-            class="w-full px-3 py-2 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white focus:border-rms-white transition-colors"
+            class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
           >
             <option value="">Все отделы</option>
             {#each filtersData.divisions as division}
@@ -197,18 +185,17 @@
         </div>
       </div>
 
-      <!-- Кнопки -->
       <div class="flex justify-end space-x-3 pt-4 border-t border-rms-mine-shaft">
         <button
           type="button"
           on:click={handleClear}
-          class="px-6 py-2.5 text-sm font-medium text-rms-white bg-rms-mine-shaft border border-rms-dove-gray rounded-lg hover:bg-rms-dove-gray hover:text-rms-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rms-white transition-colors"
+          class="px-5 py-2.5 text-sm font-medium text-rms-white bg-rms-mine-shaft border border-rms-dove-gray rounded-lg hover:bg-rms-dove-gray hover:text-rms-black focus:outline-none focus:ring-2 focus:ring-rms-white/50 transition-all duration-300"
         >
           Сбросить всё
         </button>
         <button
           type="submit"
-          class="px-6 py-2.5 text-sm font-medium text-rms-black bg-rms-white border border-transparent rounded-lg hover:bg-rms-nobel focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rms-white transition-colors"
+          class="px-5 py-2.5 text-sm font-medium text-rms-black bg-rms-white border border-transparent rounded-lg hover:bg-rms-nobel focus:outline-none focus:ring-2 focus:ring-rms-white/50 transition-all duration-300"
         >
           Применить фильтры
         </button>

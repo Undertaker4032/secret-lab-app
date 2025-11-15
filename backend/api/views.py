@@ -11,11 +11,18 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.conf import settings
 from employees.api.serializers import EmployeeSerializer
 from employees.models import Employee
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
 
 auth_logger = logging.getLogger('api.auth')
 api_logger = logging.getLogger('api')
+
+def get_csrf_token(request):
+    """Эндпоинт для получения CSRF токена"""
+    return JsonResponse({'csrfToken': get_token(request)})
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
@@ -48,12 +55,28 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                                             extra={'user': username})
                         employee_data = None
                     
-                    response.data['user'] = {
-                        'id': user.id,
-                        'username': user.username,
-                        'employee_id': employee.id if employee else None
+                    # refresh token в куки
+                    refresh_token = response.data['refresh']
+                    response.set_cookie(
+                        key=settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'],
+                        value=refresh_token,
+                        max_age=settings.SIMPLE_JWT['AUTH_COOKIE_MAX_AGE'],
+                        secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                        httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                        samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                        path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
+                    )
+                    
+                    # Возвращение access token
+                    response.data = {
+                        'access': response.data['access'],
+                        'user': {
+                            'id': user.id,
+                            'username': user.username,
+                            'employee_id': employee.id if employee else None
+                        },
+                        'employee': employee_data
                     }
-                    response.data['employee'] = employee_data
                     
                 except User.DoesNotExist:
                     auth_logger.error(f"Пользователь {username} не найден после успешного входа",
@@ -80,6 +103,57 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+class CookieTokenRefreshView(APIView):
+    def post(self, request):
+        try:
+            refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
+            
+            if not refresh_token:
+                auth_logger.warning("Refresh token не найден в куках")
+                return Response(
+                    {'error': 'Refresh token not found'}, 
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            
+            refresh = RefreshToken(refresh_token)
+            
+            access_token = str(refresh.access_token)
+            
+            # Если включена ротация токенов, генерация refresh token
+            if settings.SIMPLE_JWT.get('ROTATE_REFRESH_TOKENS', False):
+                refresh.set_jti()
+                refresh.set_exp()
+                new_refresh_token = str(refresh)
+                
+                # обновление refresh token в куки
+                response = Response({
+                    'access': access_token
+                })
+                
+                response.set_cookie(
+                    key=settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'],
+                    value=new_refresh_token,
+                    max_age=settings.SIMPLE_JWT['AUTH_COOKIE_MAX_AGE'],
+                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                    path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
+                )
+                
+                return response
+            
+            return Response({
+                'access': access_token
+            })
+            
+        except Exception as e:
+            auth_logger.error(f"Ошибка при обновлении токена - {str(e)}",
+                              extra={'action': 'token_refresh_error'},
+                              exc_info=True)
+            return Response(
+                {'error': 'Invalid refresh token'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
 # class RegisterView(APIView):
 #     def post(self, request):
@@ -116,13 +190,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 #                 'username': user.username,
 #             }
 #         })
-
-class LogoutSerializer(serializers.Serializer):
-    refresh_token = serializers.CharField(required=True)
-    
+   
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = LogoutSerializer
 
     def post(self, request):
         username = request.user.username
@@ -130,22 +200,33 @@ class LogoutView(APIView):
                          extra={'action': 'logout', 'user': username})
 
         try:
-            refresh_token = request.data.get('refresh_token')
-            if not refresh_token:
-                return Response(
-                    {'error': 'refresh_token обязателен'}, 
-                    status=status.HTTP_400_BAD_REQUEST)
+            refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
             
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-
-            return Response(status=status.HTTP_205_RESET_CONTENT)
+            if refresh_token:
+                try:
+                    token = RefreshToken(refresh_token)
+                    token.blacklist()
+                except Exception as e:
+                    auth_logger.warning(f"Ошибка при добавлении токена в черный список: {str(e)}")
+            
+            response = Response(status=status.HTTP_205_RESET_CONTENT)
+            response.delete_cookie(
+                key=settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'],
+                path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
+            )
+            
+            return response
         
         except Exception as e:
             auth_logger.error(f"Ошибка при выходе пользователя {username} - {str(e)}",
                               extra={'action': 'logout_error', 'user': username},
                               exc_info=True)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            response = Response(
+                {'error': 'Logout failed'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
+            return response
         
 class UserProfileSerializer(serializers.Serializer):
     id = serializers.IntegerField()

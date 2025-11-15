@@ -18,7 +18,6 @@
     showUserMenu = false;
   }
 
-  // Закрываем меню пользователя при клике вне его
   function handleClickOutside(event: MouseEvent): void {
     if (!(event.target as HTMLElement).closest('.user-menu')) {
       showUserMenu = false;

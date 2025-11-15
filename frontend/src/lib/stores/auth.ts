@@ -1,7 +1,12 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 
-// Добавляем интерфейсы для вложенных объектов
+export const accessToken = writable<string | null>(
+  browser ? localStorage.getItem('accessToken') : null
+);
+export const isAuthenticated = writable<boolean>(false);
+export const authLoading = writable<boolean>(true);
+
 export interface ClearanceLevel {
   id: number;
   name: string;
@@ -28,7 +33,6 @@ export interface Position {
   name: string;
 }
 
-// Обновляем интерфейс Employee
 export interface Employee {
   id: number;
   name: string;
@@ -41,7 +45,6 @@ export interface Employee {
   profile_picture: string | null;
 }
 
-// User интерфейс с employee_id
 export interface User {
   id: number;
   username: string;
@@ -58,53 +61,37 @@ export interface LoginResponse extends AuthTokens {
   employee?: Employee;
 }
 
-// Функции для работы с localStorage
+if (browser) {
+  accessToken.subscribe((token) => {
+    if (token) {
+      localStorage.setItem('accessToken', token);
+    } else {
+      localStorage.removeItem('accessToken');
+    }
+  });
+}
+
 const getStoredItem = <T>(key: string): T | null => {
   if (!browser) return null;
-  
   try {
     const item = localStorage.getItem(key);
-    if (!item) return null;
-    
-    // Для строковых значений (токены)
-    if (key.includes('Token')) {
-      return item as T;
-    }
-    
-    return JSON.parse(item) as T;
+    return item ? JSON.parse(item) as T : null;
   } catch (error) {
-    console.error(`Error reading ${key} from localStorage:`, error);
     return null;
   }
 };
 
-const setStoredItem = <T>(key: string, value: T): void => {
-  if (!browser) return;
-  
-  if (typeof value === 'object') {
-    localStorage.setItem(key, JSON.stringify(value));
-  } else {
-    localStorage.setItem(key, value as string);
-  }
-};
-
-const removeStoredItem = (key: string): void => {
-  if (browser) {
-    localStorage.removeItem(key);
-  }
-};
-
-// Создаем хранилища
 export const user = writable<User | null>(getStoredItem<User>('user'));
 export const employee = writable<Employee | null>(getStoredItem<Employee>('employee'));
-export const accessToken = writable<string | null>(getStoredItem<string>('accessToken'));
-export const refreshToken = writable<string | null>(getStoredItem<string>('refreshToken'));
-export const isAuthenticated = writable<boolean>(false);
-export const authLoading = writable<boolean>(true);
 
-// Синхронизация с localStorage
+const setStoredItem = <T>(key: string, value: T): void => {
+  if (!browser) return;
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
 user.subscribe((value) => {
   setStoredItem('user', value);
+  isAuthenticated.set(!!value);
 });
 
 employee.subscribe((value) => {
@@ -112,27 +99,25 @@ employee.subscribe((value) => {
 });
 
 accessToken.subscribe((value) => {
-  setStoredItem('accessToken', value);
-  isAuthenticated.set(!!value);
+  if (browser) {
+    if (value) {
+      localStorage.setItem('accessToken', value);
+    } else {
+      localStorage.removeItem('accessToken');
+    }
+  }
 });
 
-refreshToken.subscribe((value) => {
-  setStoredItem('refreshToken', value);
-});
-
-// Функция для очистки всех данных аутентификации
 export function clearAuth(): void {
   user.set(null);
   employee.set(null);
   accessToken.set(null);
-  refreshToken.set(null);
   isAuthenticated.set(false);
   authLoading.set(false);
   
   if (browser) {
-    removeStoredItem('user');
-    removeStoredItem('employee');
-    removeStoredItem('accessToken');
-    removeStoredItem('refreshToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('employee');
+    localStorage.removeItem('accessToken');
   }
 }

@@ -8,7 +8,6 @@ from django.conf import settings
 logger = logging.getLogger('api')
 
 def custom_exception_handler(exc, context):
-    # Получаем стандартный response
     response = exception_handler(exc, context)
     request = context.get('request')
     
@@ -21,7 +20,6 @@ def custom_exception_handler(exc, context):
             extra={'user': request.user if request and request.user.is_authenticated else None}
         )
         
-        # Показ деталей в debug режиме
         if settings.DEBUG:
             return Response({
                 'error': True,
@@ -52,7 +50,6 @@ def custom_exception_handler(exc, context):
         'details': {}
     }
     
-    # Обработка разных типов ошибок
     if response.status_code == status.HTTP_400_BAD_REQUEST:
         error_data['message'] = 'Ошибка валидации данных'
         error_data['details'] = response.data

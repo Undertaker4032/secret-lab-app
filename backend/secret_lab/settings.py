@@ -1,8 +1,7 @@
 from pathlib import Path
 import os
-from dotenv import load_dotenv  # Добавляем импорт
+from dotenv import load_dotenv
 
-# Загрузка переменных из .env
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -141,7 +140,6 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
-# Настройки REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
@@ -157,25 +155,39 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter', # Поиск
         'rest_framework.filters.OrderingFilter', # Сортировка
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # Пагинация на будущее
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     
     'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
 }
 
-# Настройки CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React/Svelte dev server
     "http://127.0.0.1:3000",
     "http://localhost:5173",  # Стандартный порт для Svelte dev-server
     "http://127.0.0.1:5173",
     "http://localhost:5000",  # Другие возможные порты
+    "http://localhost:4173",  # Svelte preview
 ]
 
-# Разрешить передачу учетных данных
 CORS_ALLOW_CREDENTIALS = True
 
-# Логирование
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:4173",
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 LOGGING = {
     'version': 1,
@@ -311,9 +323,13 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
-
-    'AUTH_COOKIE': 'access_token',
-    'AUTH_COOKIE_SECURE': True,
-    'AUTH_COOKIE_HTTP_ONLY': True,
-    'AUTH_COOKIE_SAMESITE': 'Lax',
+    
+    # Настройки для куки
+    'AUTH_COOKIE_ACCESS': 'access_token',
+    'AUTH_COOKIE_REFRESH': 'refresh_token',
+    'AUTH_COOKIE_SECURE': not DEBUG, # True в production для HTTPS
+    'AUTH_COOKIE_HTTP_ONLY': True, # Защита от XSS
+    'AUTH_COOKIE_SAMESITE': 'Lax', # Защита от CSRF
+    'AUTH_COOKIE_PATH': '/', # Путь куки
+    'AUTH_COOKIE_MAX_AGE': 60 * 60 * 24 * 7, # 7 дней
 }

@@ -3,6 +3,23 @@ export interface ResearchStatus {
   name: string;
 }
 
+export interface Division {
+  id: number;
+  name: string;
+}
+
+export interface ResearchStatus {
+  id: number;
+  name: string;
+}
+
+export interface ResearchStatusesResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ResearchStatus[];
+}
+
 export interface Research {
   id: number;
   title: string;

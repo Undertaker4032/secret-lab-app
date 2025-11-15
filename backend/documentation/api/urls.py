@@ -4,7 +4,7 @@ from .views import DocumentTypeViewSet
 from . import views
 
 router = DefaultRouter()
-router.register(r'document-type', DocumentTypeViewSet, basename='document-type')
+router.register(r'document-types', DocumentTypeViewSet, basename='document-type')
 router.register(r'', views.DocumentViewSet, basename='documentation')  # Регистрация ViewSet
 
 urlpatterns = [

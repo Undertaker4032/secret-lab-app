@@ -71,7 +71,6 @@ class ClearanceLevel(models.Model):
     
 # Основная модель Сотрудник
 class Employee(models.Model):
-    # Связь с моделью User для аутентификации
     user = models.OneToOneField(User, on_delete=models.CASCADE,verbose_name='Пользователь')
     name = models.CharField(max_length=100, verbose_name='Имя и Фамилия')
     is_active = models.BooleanField(default=True, verbose_name='Сотрудник действующий?')

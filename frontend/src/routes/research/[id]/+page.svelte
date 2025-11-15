@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { page } from '$app/state';
-  import { api } from '$lib/utils/api';
   import AccessCheck from '$lib/components/ui/AccessCheck.svelte';
+  import { api } from '$lib/utils/api';
   import type { ResearchObject } from '$lib/utils/researchObject';
-  import type { PageData } from './$types';
 
-  let { data }: { data: PageData } = $props();
+  let { data }: { data: { itemId: number } } = $props();
 
-  let researchData: ResearchObject | null = $state(null);
-  let loading = $state(true);
+  let researchData = $state<ResearchObject | null>(null);
   let accessGranted = $state(false);
   let accessDenied = $state(false);
-  let error = $state('');
+  let showAccessCheck = $state(true);
+  let isLoading = $state(false);
 
   const pageTitle = $derived(
-    data.meta?.title || 'Исследование - RMS Laboratories'
+    researchData?.title 
+      ? `${researchData.title} - Исследования` 
+      : 'Исследование - RMS Laboratories'
   );
 
   const formatDate = (dateString: string) => {
@@ -30,52 +30,37 @@
 
   const getStatusColor = (status: string) => {
     const statusColors: Record<string, string> = {
-      'Активно': 'bg-green-600',
-      'Завершено': 'bg-blue-600',
-      'Приостановлено': 'bg-yellow-600',
-      'В планах': 'bg-gray-600'
+      'Активно': 'bg-rms-mine-shaft text-rms-white',
+      'Завершено': 'bg-rms-black text-rms-nobel border border-rms-mine-shaft',
+      'Приостановлено': 'bg-rms-black text-rms-nobel border border-rms-mine-shaft',
+      'В планах': 'bg-rms-black text-rms-nobel border border-rms-mine-shaft'
     };
-    return statusColors[status] || 'bg-gray-600';
+    return statusColors[status] || 'bg-rms-black text-rms-nobel border border-rms-mine-shaft';
   };
 
-  // Функция для безопасного получения ID
   function getResearchId(): number {
-    const id = page.params.id;
-    if (!id) {
-      throw new Error('ID исследования не указан');
-    }
-    return +id;
+    return data.itemId;
   }
 
-  async function loadResearch(): Promise<void> {
+  async function handleAccessGranted(): Promise<void> {
     try {
-      const researchId = getResearchId();
-      const data = await api.getResearchObject(researchId);
-      researchData = data;
-    } catch (err: any) {
-      console.error('Error loading research:', err);
-      error = err.message || 'Не удалось загрузить исследование';
+      isLoading = true;
+      researchData = await api.getResearchObject(getResearchId());
+      accessGranted = true;
+      showAccessCheck = false;
+    } catch (err) {
+      console.error('Failed to load research:', err);
+      accessDenied = true;
+      showAccessCheck = false;
     } finally {
-      loading = false;
+      isLoading = false;
     }
-  }
-
-  function handleAccessGranted(): void {
-    accessGranted = true;
   }
 
   function handleAccessDenied(): void {
     accessDenied = true;
+    showAccessCheck = false;
   }
-
-  // Проверяем наличие ID при загрузке
-  onMount(() => {
-    if (!page.params.id) {
-      error = 'ID исследования не указан';
-      loading = false;
-      accessDenied = true;
-    }
-  });
 </script>
 
 <svelte:head>
@@ -84,15 +69,19 @@
 
 <div class="min-h-screen bg-rms-black py-8">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Проверка наличия ID -->
     {#if !page.params.id}
       <div class="text-center py-16">
-        <div class="bg-rms-cod-gray rounded-lg border border-red-700 p-8 max-w-md mx-auto">
-          <h2 class="text-2xl font-bold text-red-400 mb-2">Ошибка</h2>
+        <div class="bg-rms-cod-gray rounded-lg border border-rms-mine-shaft p-8 max-w-md mx-auto">
+          <div class="w-12 h-12 mx-auto mb-4 text-rms-nobel">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+          </div>
+          <h2 class="text-xl font-bold text-rms-white mb-2">Ошибка</h2>
           <p class="text-rms-nobel mb-6">ID исследования не указан в URL</p>
           <a 
             href="/research" 
-            class="inline-flex items-center px-4 py-2 bg-rms-white text-rms-black rounded-lg hover:bg-rms-nobel transition-colors"
+            class="inline-flex items-center px-4 py-2 bg-rms-white text-rms-black rounded hover:bg-rms-nobel transition-colors"
           >
             ← Вернуться к списку исследований
           </a>
@@ -100,7 +89,7 @@
       </div>
     {:else}
       <!-- Проверка доступа -->
-      {#if !accessGranted && !accessDenied}
+      {#if showAccessCheck}
         <AccessCheck 
           itemId={getResearchId()} 
           itemType="research"
@@ -110,40 +99,19 @@
       {/if}
 
       <!-- Сообщение об отказе в доступе -->
-      {#if accessDenied && page.params.id}
+      {#if accessDenied}
         <div class="text-center py-16">
-          <div class="bg-rms-cod-gray rounded-lg border border-red-700 p-8 max-w-md mx-auto">
-            <svg class="mx-auto h-16 w-16 text-red-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <h2 class="text-2xl font-bold text-red-400 mb-2">Доступ запрещен</h2>
-            <p class="text-rms-nobel mb-6">{error || 'У вас недостаточный уровень допуска для просмотра этого исследования'}</p>
+          <div class="bg-rms-cod-gray rounded-lg border border-rms-mine-shaft p-8 max-w-md mx-auto">
+            <div class="w-12 h-12 mx-auto mb-4 text-rms-nobel">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold text-rms-white mb-2">Доступ запрещен</h2>
+            <p class="text-rms-nobel mb-6">У вас недостаточный уровень допуска для просмотра этого исследования</p>
             <a 
               href="/research" 
-              class="inline-flex items-center px-4 py-2 bg-rms-white text-rms-black rounded-lg hover:bg-rms-nobel transition-colors"
-            >
-              ← Вернуться к списку исследований
-            </a>
-          </div>
-        </div>
-      {/if}
-
-      <!-- Загрузка контента -->
-      {#if accessGranted && loading}
-        <div class="flex justify-center items-center py-16">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-rms-white"></div>
-        </div>
-      {/if}
-
-      <!-- Ошибка загрузки -->
-      {#if accessGranted && error && !researchData}
-        <div class="text-center py-16">
-          <div class="bg-rms-cod-gray rounded-lg border border-red-700 p-8 max-w-md mx-auto">
-            <h2 class="text-2xl font-bold text-red-400 mb-2">Ошибка загрузки</h2>
-            <p class="text-rms-nobel mb-6">{error}</p>
-            <a 
-              href="/research" 
-              class="inline-flex items-center px-4 py-2 bg-rms-white text-rms-black rounded-lg hover:bg-rms-nobel transition-colors"
+              class="inline-flex items-center px-4 py-2 bg-rms-white text-rms-black rounded hover:bg-rms-nobel transition-colors"
             >
               ← Вернуться к списку исследований
             </a>
@@ -153,123 +121,154 @@
 
       <!-- Контент исследования -->
       {#if accessGranted && researchData}
-        <div class="bg-rms-white text-rms-black rounded-lg shadow-2xl overflow-hidden">
-          <!-- Заголовок исследования в стиле А4 -->
-          <div class="bg-rms-cod-gray text-rms-white p-8 border-b-4 border-blue-600">
-            <div class="flex justify-between items-start mb-4">
+        <div class="bg-rms-cod-gray rounded-lg border border-rms-mine-shaft overflow-hidden">
+          <!-- Заголовок исследования -->
+          <div class="p-8 border-b border-rms-mine-shaft">
+            <div class="flex flex-col lg:flex-row justify-between items-start gap-4 mb-6">
               <div class="flex-1">
-                <div class="flex items-center gap-3 mb-2">
-                  <span class="inline-block px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
+                <div class="flex flex-wrap items-center gap-2 mb-4">
+                  <span class="inline-flex items-center px-3 py-1 bg-rms-mine-shaft text-rms-nobel text-sm rounded border border-rms-dove-gray">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                    </svg>
                     ИССЛЕДОВАНИЕ
                   </span>
-                  <span class="inline-block px-3 py-1 {getStatusColor(researchData.status_name)} text-white text-sm rounded-full">
+                  <span class="inline-flex items-center px-3 py-1 {getStatusColor(researchData.status_name)} text-sm rounded border border-rms-mine-shaft">
                     {researchData.status_name}
                   </span>
+                  <span class="inline-flex items-center px-3 py-1 bg-rms-black text-rms-nobel text-sm rounded border border-rms-mine-shaft">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    {researchData.required_clearance_name}
+                  </span>
                 </div>
-                <h1 class="text-3xl font-bold leading-tight">{researchData.title}</h1>
-              </div>
-              <span class="inline-flex items-center px-3 py-1 bg-red-900/30 text-red-300 rounded-full text-sm border border-red-700">
-                {researchData.required_clearance_name}
-              </span>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-rms-nobel">
-              <div>
-                <span class="font-medium text-rms-white">Руководитель:</span> {researchData.lead_name}
-              </div>
-              <div>
-                <span class="font-medium text-rms-white">Начато:</span> {formatDate(researchData.created_date)}
-              </div>
-              {#if researchData.team_members.length > 0}
-                <div class="md:col-span-2">
-                  <span class="font-medium text-rms-white">Команда:</span> {researchData.team_members.join(', ')}
+                <h1 class="text-2xl font-bold text-rms-white leading-tight mb-4">{researchData.title}</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-rms-nobel">
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span class="font-medium text-rms-white mr-2">Руководитель:</span>
+                    {researchData.lead_name}
+                  </div>
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="font-medium text-rms-white mr-2">Начато:</span>
+                    {formatDate(researchData.created_date)}
+                  </div>
+                  {#if researchData.team_members.length > 0}
+                    <div class="md:col-span-2 flex items-start">
+                      <svg class="w-4 h-4 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                      </svg>
+                      <div>
+                        <span class="font-medium text-rms-white mr-2">Команда:</span>
+                        {researchData.team_members.join(', ')}
+                      </div>
+                    </div>
+                  {/if}
                 </div>
-              {/if}
+              </div>
             </div>
           </div>
 
           <!-- Содержимое исследования -->
-          <div class="p-8 min-h-[calc(210mm-100px)] font-serif text-lg leading-relaxed space-y-8">
-            <!-- Описание -->
+          <div class="p-8 space-y-8">
             {#if researchData.description}
               <section>
-                <h2 class="text-2xl font-bold text-rms-cod-gray mb-4 border-b-2 border-blue-200 pb-2">
-                  Описание исследования
-                </h2>
-                <div class="prose prose-lg max-w-none">
-                  {#each researchData.description.split('\n') as paragraph}
-                    {#if paragraph.trim()}
-                      <p class="mb-4 text-justify">{paragraph}</p>
-                    {:else}
-                      <br />
-                    {/if}
-                  {/each}
+                <h2 class="text-xl font-bold text-rms-white mb-4 pb-2 border-b border-rms-mine-shaft">Описание исследования</h2>
+                <div class="prose prose-invert max-w-none">
+                  <div class="space-y-4 text-rms-white leading-relaxed">
+                    {#each researchData.description.split('\n') as paragraph}
+                      {#if paragraph.trim()}
+                        <p class="text-justify">{paragraph}</p>
+                      {:else}
+                        <div class="h-4"></div>
+                      {/if}
+                    {/each}
+                  </div>
                 </div>
               </section>
             {/if}
 
-            <!-- Цели -->
             {#if researchData.objectives}
               <section>
-                <h2 class="text-2xl font-bold text-rms-cod-gray mb-4 border-b-2 border-blue-200 pb-2">
-                  Цели исследования
-                </h2>
-                <div class="prose prose-lg max-w-none">
-                  {#each researchData.objectives.split('\n') as paragraph}
-                    {#if paragraph.trim()}
-                      <p class="mb-4 text-justify">{paragraph}</p>
-                    {:else}
-                      <br />
-                    {/if}
-                  {/each}
+                <h2 class="text-xl font-bold text-rms-white mb-4 pb-2 border-b border-rms-mine-shaft">Цели исследования</h2>
+                <div class="prose prose-invert max-w-none">
+                  <div class="space-y-4 text-rms-white leading-relaxed">
+                    {#each researchData.objectives.split('\n') as paragraph}
+                      {#if paragraph.trim()}
+                        <p class="text-justify">{paragraph}</p>
+                      {:else}
+                        <div class="h-4"></div>
+                      {/if}
+                    {/each}
+                  </div>
                 </div>
               </section>
             {/if}
 
-            <!-- Результаты -->
             {#if researchData.findings}
               <section>
-                <h2 class="text-2xl font-bold text-rms-cod-gray mb-4 border-b-2 border-green-200 pb-2">
-                  Результаты и выводы
-                </h2>
-                <div class="prose prose-lg max-w-none">
-                  {#each researchData.findings.split('\n') as paragraph}
-                    {#if paragraph.trim()}
-                      <p class="mb-4 text-justify">{paragraph}</p>
-                    {:else}
-                      <br />
-                    {/if}
-                  {/each}
+                <h2 class="text-xl font-bold text-rms-white mb-4 pb-2 border-b border-rms-mine-shaft">Результаты и выводы</h2>
+                <div class="prose prose-invert max-w-none">
+                  <div class="space-y-4 text-rms-white leading-relaxed">
+                    {#each researchData.findings.split('\n') as paragraph}
+                      {#if paragraph.trim()}
+                        <p class="text-justify">{paragraph}</p>
+                      {:else}
+                        <div class="h-4"></div>
+                      {/if}
+                    {/each}
+                  </div>
                 </div>
               </section>
             {/if}
           </div>
 
           <!-- Футер исследования -->
-          <div class="bg-rms-cod-gray text-rms-nobel p-6 border-t-4 border-blue-600">
-            <div class="flex justify-between items-center text-sm">
-              <div>
-                <span class="text-rms-white font-medium">RMS Laboratories</span> • Научно-исследовательский отдел
+          <div class="bg-rms-black p-6 border-t border-rms-mine-shaft">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-rms-nobel">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                </svg>
+                <span class="font-medium text-rms-white">RMS Laboratories</span>
+                <span class="mx-2">•</span>
+                <span>Научно-исследовательский отдел</span>
               </div>
-              <div class="text-right">
-                <div>ID исследования: {researchData.id}</div>
-                <div>Требуемый уровень: {researchData.required_clearance_name}</div>
+              <div class="text-center sm:text-right">
+                <div>ID исследования: <span class="font-mono text-rms-white">{researchData.id}</span></div>
+                <div>Уровень доступа: <span class="text-rms-white">{researchData.required_clearance_name}</span></div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Кнопка возврата -->
-        <div class="mt-6 text-center">
+        <div class="mt-8 text-center">
           <a 
             href="/research" 
-            class="inline-flex items-center px-6 py-3 bg-rms-cod-gray text-rms-white rounded-lg border border-rms-mine-shaft hover:border-rms-dove-gray hover:shadow-lg transition-all"
+            class="inline-flex items-center px-6 py-3 bg-rms-cod-gray text-rms-white rounded hover:bg-rms-mine-shaft transition-colors border border-rms-mine-shaft"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
             Вернуться к списку исследований
           </a>
+        </div>
+      {:else if accessGranted && !researchData && !isLoading}
+        <!-- Загрузка данных -->
+        <div class="text-center py-16">
+          <div class="bg-rms-cod-gray rounded-lg border border-rms-mine-shaft p-8 max-w-md mx-auto">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-rms-white mx-auto mb-4"></div>
+            <h2 class="text-xl font-bold text-rms-white mb-2">Загрузка исследования</h2>
+            <p class="text-rms-nobel">Получение данных исследования...</p>
+          </div>
         </div>
       {/if}
     {/if}
@@ -277,21 +276,13 @@
 </div>
 
 <style>
-  .prose {
-    color: #111111;
+  .prose-invert {
+    color: #ffffff;
   }
   
-  .prose p {
+  .prose-invert p {
     margin-bottom: 1rem;
     text-align: justify;
-  }
-  
-  /* Стили для имитации бумаги А4 */
-  @media (min-width: 210mm) {
-    .bg-rms-white {
-      box-shadow: 
-        0 0 0 1px rgba(0,0,0,0.1),
-        0 10px 30px rgba(0,0,0,0.3);
-    }
+    line-height: 1.7;
   }
 </style>

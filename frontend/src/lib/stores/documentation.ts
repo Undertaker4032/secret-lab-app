@@ -3,14 +3,12 @@ import { api } from '$lib/utils/api';
 import { cleanFilters, buildUrlWithFilters } from '$lib/utils/apiFilters';
 import type { Documentation, DocumentationResponse, DocumentationFilters } from '$lib/utils/documentation';
 
-// Хранилища
 export const documentation = writable<Documentation[]>([]);
 export const documentationLoading = writable<boolean>(false);
 export const documentationError = writable<string | null>(null);
 export const documentationFilters = writable<DocumentationFilters>({});
 export const documentationCount = writable<number>(0);
 
-// Основная функция загрузки документации
 export async function fetchDocumentation(filters: DocumentationFilters = {}) {
   documentationLoading.set(true);
   documentationError.set(null);
@@ -34,7 +32,6 @@ export async function fetchDocumentation(filters: DocumentationFilters = {}) {
   }
 }
 
-// Функция обновления фильтров
 export function updateDocumentationFilters(newFilters: Partial<DocumentationFilters>) {
   const currentFilters = get(documentationFilters);
   const mergedFilters = { ...currentFilters, ...cleanFilters(newFilters) };
@@ -43,7 +40,6 @@ export function updateDocumentationFilters(newFilters: Partial<DocumentationFilt
   fetchDocumentation(mergedFilters);
 }
 
-// Функция сброса фильтров
 export function clearDocumentationFilters() {
   documentationFilters.set({});
   fetchDocumentation();

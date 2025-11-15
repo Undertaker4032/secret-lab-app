@@ -16,11 +16,9 @@
   let currentAnimation: any = $state(null);
   let animationStep: 'idle' | 'start' | 'loading' | 'success' | 'fail' = $state('idle');
 
-  // ФИКС: Сохраняем данные формы даже во время анимации
   let savedUsername: string = $state('');
   let savedPassword: string = $state('');
 
-  // Функции для управления анимациями
   function loadAnimation(animationName: string, loop: boolean = false): Promise<void> {
     return new Promise((resolve, reject) => {
       if (currentAnimation) {
@@ -72,7 +70,6 @@
       
     } catch (err) {
       console.error('Ошибка загрузки анимации:', err);
-      // Если анимация не загрузилась, продолжаем без нее
       animationStep = 'loading';
     }
   }
@@ -101,7 +98,6 @@
     
     if (loading) return;
     
-    // ФИКС: Сохраняем данные перед началом анимации
     savedUsername = username;
     savedPassword = password;
     
@@ -111,7 +107,6 @@
     try {
       await playLoginSequence();
       
-      // ФИКС: Используем сохраненные данные
       await api.login(savedUsername, savedPassword);
       
       await playResultAnimation(true);
@@ -125,7 +120,6 @@
       await playResultAnimation(false);
       error = err instanceof Error ? err.message : 'Ошибка входа. Проверьте логин и пароль.';
       
-      // ФИКС: Возвращаем к форме через 2 секунды после анимации ошибки
       setTimeout(() => {
         animationStep = 'idle';
       }, 2000);
@@ -152,7 +146,6 @@
     isOpen = false;
   }
 
-  // Обработчик клавиатуры для оверлея
   function handleOverlayKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -160,7 +153,6 @@
     }
   }
 
-  // Закрываем по ESC
   function handleKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       handleClose();
@@ -177,7 +169,6 @@
     }
   });
 
-  // Эффект для очистки анимации при размонтировании
   $effect(() => {
     return () => {
       if (currentAnimation) {
@@ -213,7 +204,7 @@
     >
       <div class="p-6">
         {#if animationStep === 'idle'}
-          <!-- Показываем форму только когда нет активной анимации -->
+          <!-- Форма только когда нет активной анимации -->
           <form onsubmit={handleLogin}>
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-2xl font-bold text-rms-white">Вход в систему</h2>
@@ -281,7 +272,7 @@
             </div>
           </form>
         {:else}
-          <!-- Показываем анимацию во время процесса логина -->
+          <!-- Анимация во время процесса логина -->
           <div class="flex flex-col items-center justify-center py-8">
             <div 
               bind:this={animationContainer}

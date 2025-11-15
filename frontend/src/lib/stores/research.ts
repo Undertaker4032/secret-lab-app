@@ -3,14 +3,12 @@ import { api } from '$lib/utils/api';
 import { cleanFilters, buildUrlWithFilters } from '$lib/utils/apiFilters';
 import type { Research, ResearchResponse, ResearchFilters } from '$lib/utils/research';
 
-// Хранилища
 export const research = writable<Research[]>([]);
 export const researchLoading = writable<boolean>(false);
 export const researchError = writable<string | null>(null);
 export const researchFilters = writable<ResearchFilters>({});
 export const researchCount = writable<number>(0);
 
-// Основная функция загрузки исследований
 export async function fetchResearch(filters: ResearchFilters = {}) {
   researchLoading.set(true);
   researchError.set(null);
@@ -34,7 +32,6 @@ export async function fetchResearch(filters: ResearchFilters = {}) {
   }
 }
 
-// Функция обновления фильтров
 export function updateResearchFilters(newFilters: Partial<ResearchFilters>) {
   const currentFilters = get(researchFilters);
   const mergedFilters = { ...currentFilters, ...cleanFilters(newFilters) };
@@ -43,7 +40,6 @@ export function updateResearchFilters(newFilters: Partial<ResearchFilters>) {
   fetchResearch(mergedFilters);
 }
 
-// Функция сброса фильтров
 export function clearResearchFilters() {
   researchFilters.set({});
   fetchResearch();

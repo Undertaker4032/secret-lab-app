@@ -57,8 +57,9 @@ class ResearchViewSet(viewsets.ModelViewSet):
             raise
 
     def retrieve(self, request, *args, **kwargs):
+        username = request.user.username if request.user.is_authenticated else 'Anonymous'
         research = self.get_object()
-        logger.info(f"Запрос исследования '{research.title}' [ID:{research.id}] от пользователя {username}",  # ✅ Исправлено
+        logger.info(f"Запрос исследования '{research.title}' [ID:{research.id}] от пользователя {username}",
                    extra={'action': 'research_retrieve', 'user': username})
         return super().retrieve(request, *args, **kwargs)
     
