@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -159,6 +162,18 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
     
     'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+        'auth': '5/minute',
+        'api': '500/hour',
+    }
 }
 
 CORS_ALLOWED_ORIGINS = [
@@ -189,6 +204,44 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    
+    # Настройки для куки
+    'AUTH_COOKIE_ACCESS': 'access_token',
+    'AUTH_COOKIE_REFRESH': 'refresh_token',
+    'AUTH_COOKIE_SECURE': not DEBUG, # True в production для HTTPS
+    'AUTH_COOKIE_HTTP_ONLY': True, # Защита от XSS
+    'AUTH_COOKIE_SAMESITE': 'Lax', # Защита от CSRF
+    'AUTH_COOKIE_PATH': '/', # Путь куки
+    'AUTH_COOKIE_MAX_AGE': 60 * 60 * 24 * 7, # 7 дней
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+            'RETRY_ON_TIMEOUT': True,
+        },
+        'KEY_PREFIX': 'myapp'
+    }
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -212,6 +265,9 @@ LOGGING = {
     'filters': {
         'require_debug_true': {
             '()': 'django.utils.log.RequireDebugTrue',
+        },
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
         },
     },
     
@@ -248,6 +304,12 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'files',
             'encoding': 'utf-8',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': False,
         }
     },
     
@@ -258,12 +320,17 @@ LOGGING = {
             'propagate': False,
         },
         'django.request': {
-            'handlers': ['file_errors'],
+            'handlers': ['file_errors', 'mail_admins'],
             'level': 'ERROR',
             'propagate': False,
         },
         'django.security': {
-            'handlers': ['file_security'],
+            'handlers': ['file_security', 'mail_admins'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['file_app'],
             'level': 'WARNING',
             'propagate': False,
         },
@@ -284,7 +351,7 @@ LOGGING = {
             'propagate': False,
         },
         'api.security': {
-            'handlers': ['file_security'],
+            'handlers': ['file_security', 'mail_admins'],
             'level': 'WARNING',
             'propagate': False,
         },
@@ -306,30 +373,11 @@ LOGGING = {
     },
 }
 
-
 import os
 os.makedirs('logs', exist_ok=True)
 
-from datetime import timedelta
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': True,
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',
-    
-    # Настройки для куки
-    'AUTH_COOKIE_ACCESS': 'access_token',
-    'AUTH_COOKIE_REFRESH': 'refresh_token',
-    'AUTH_COOKIE_SECURE': not DEBUG, # True в production для HTTPS
-    'AUTH_COOKIE_HTTP_ONLY': True, # Защита от XSS
-    'AUTH_COOKIE_SAMESITE': 'Lax', # Защита от CSRF
-    'AUTH_COOKIE_PATH': '/', # Путь куки
-    'AUTH_COOKIE_MAX_AGE': 60 * 60 * 24 * 7, # 7 дней
-}
+try:
+    logger.info("Настройки приложения загружены успешно", 
+                extra={'debug_mode': DEBUG, 'allowed_hosts': ALLOWED_HOSTS})
+except Exception as e:
+    print(f"Ошибка при инициализации логирования: {e}")

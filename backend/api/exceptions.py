@@ -16,7 +16,7 @@ def custom_exception_handler(exc, context):
         user_info = f"user:{request.user.username}" if request and request.user.is_authenticated else "user:anonymous"
         logger.error(
             f"Необработанное исключение: {exc} | {user_info}",
-            exc_info=True,
+            exc_info=False,
             extra={'user': request.user if request and request.user.is_authenticated else None}
         )
         

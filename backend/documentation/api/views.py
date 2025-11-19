@@ -4,11 +4,14 @@ from ..models import Documentation, DocumentType
 from .serializers import DocumentListSerializer, DocumentObjectSerializer, DocumentTypeSerializer
 from api.permissions import ReadOnly, HasRequiredClearanceLevel
 import logging
+from rest_framework.throttling import ScopedRateThrottle
 
 
 logger = logging.getLogger('documentation')
 
 class DocumentViewSet(viewsets.ModelViewSet):
+    throttle_scope = 'api'
+    throttle_classes = [ScopedRateThrottle]
     permission_classes = [HasRequiredClearanceLevel]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -63,6 +66,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
         return super().retrieve(request, *args, **kwargs)
     
 class DocumentTypeViewSet(viewsets.ModelViewSet):
+    throttle_scope = 'api'
+    throttle_classes = [ScopedRateThrottle]
+    
     permission_classes = [ReadOnly]
     queryset = DocumentType.objects.all()
     serializer_class = DocumentTypeSerializer

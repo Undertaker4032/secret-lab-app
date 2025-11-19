@@ -16,6 +16,7 @@ from employees.api.serializers import EmployeeSerializer
 from employees.models import Employee
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from rest_framework.throttling import ScopedRateThrottle
 
 auth_logger = logging.getLogger('api.auth')
 api_logger = logging.getLogger('api')
@@ -25,17 +26,26 @@ def get_csrf_token(request):
     return JsonResponse({'csrfToken': get_token(request)})
 
 class CustomTokenObtainPairView(TokenObtainPairView):
+    throttle_scope = 'auth'
+    throttle_classes = [ScopedRateThrottle]
+
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
-        auth_logger.info(f"Попытка входа {username}",
-                         extra={'action': 'login_attempt', 'user': username})
+        ip_address = self.get_client_ip(request)
+        
+        auth_logger.info(f"Попытка входа {username} с IP {ip_address}",
+                       extra={'action': 'login_attempt', 
+                              'user': username,
+                              'ip_address': ip_address})
 
         try:
             response = super().post(request, *args, **kwargs)
             
             if response.status_code == 200:
-                auth_logger.info(f"Успешный вход пользователя {username}",
-                                 extra={'action': 'login_success', 'user': username})
+                auth_logger.info(f"Успешный вход пользователя {username} с IP {ip_address}",
+                               extra={'action': 'login_success', 
+                                      'user': username,
+                                      'ip_address': ip_address})
                 
                 try:
                     user = User.objects.get(username=username)
@@ -87,29 +97,43 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                     )
                 
             else:
-                auth_logger.warning(f"Неудачная попытка входа пользователя {username}",
-                                    extra={'action': 'login_failed',
-                                           'user': username,
-                                           'reason': 'invalid_credentials'})
+                auth_logger.warning(f"Неудачная попытка входа пользователя {username} с IP {ip_address}",
+                                  extra={'action': 'login_failed',
+                                         'user': username,
+                                         'ip_address': ip_address,
+                                         'reason': 'invalid_credentials'})
                     
             return response
             
         except Exception as e:
-            auth_logger.error(f"Ошибка при входе пользователя {username} - {str(e)}",
-                              extra={'action': 'login_error', 'user': username},
-                              exc_info=True)
+            auth_logger.error(f"Ошибка при входе пользователя {username} с IP {ip_address} - {str(e)}",
+                            extra={'action': 'login_error', 
+                                   'user': username,
+                                   'ip_address': ip_address},
+                            exc_info=True)
             return Response(
                 {'error': 'Internal server error during login'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
 class CookieTokenRefreshView(APIView):
+    throttle_scope = 'auth'
+    throttle_classes = [ScopedRateThrottle]
+
     def post(self, request):
         try:
             refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
             
             if not refresh_token:
-                auth_logger.warning("Refresh token не найден в куках")
+                auth_logger.warning("Refresh token не найден в куки")
                 return Response(
                     {'error': 'Refresh token not found'}, 
                     status=status.HTTP_401_UNAUTHORIZED
@@ -192,12 +216,19 @@ class CookieTokenRefreshView(APIView):
 #         })
    
 class LogoutView(APIView):
+    throttle_scope = 'auth'
+    throttle_classes = [ScopedRateThrottle]
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         username = request.user.username
-        auth_logger.info(f"Выход из системы пользователя {username}",
-                         extra={'action': 'logout', 'user': username})
+        ip_address = self.get_client_ip(request)
+        
+        auth_logger.info(f"Выход из системы пользователя {username} с IP {ip_address}",
+                       extra={'action': 'logout', 
+                              'user': username,
+                              'ip_address': ip_address})
 
         try:
             refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
@@ -228,12 +259,23 @@ class LogoutView(APIView):
             response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
             return response
         
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+        
 class UserProfileSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
     employee_id = serializers.IntegerField(allow_null=True)
 
 class UserProfileView(RetrieveAPIView):
+    throttle_scope = 'api'
+    throttle_classes = [ScopedRateThrottle]
+
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
 
@@ -263,3 +305,23 @@ class UserProfileView(RetrieveAPIView):
         
         serializer = self.get_serializer(data)
         return Response(serializer.data)
+    
+from django.core.cache import cache
+
+@api_view(['GET'])
+def cache_status(request):
+    """Эндпоинт для проверки работы кеша"""
+    # Тест записи в кеш
+    test_key = 'cache_test'
+    current_value = cache.get(test_key, 0)
+    new_value = current_value + 1
+    cache.set(test_key, new_value, 60)  # Храним 1 минуту
+    
+    # Информация о кеше
+    cache_info = {
+        'cache_backend': str(cache.__class__),
+        'test_counter': new_value,
+        'redis_working': True,
+    }
+    
+    return Response(cache_info)

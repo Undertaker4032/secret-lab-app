@@ -10,10 +10,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework.throttling import ScopedRateThrottle
 
 logger = logging.getLogger('employees')
 
 class EmployeeFilter(django_filters.FilterSet):
+    throttle_scope = 'api'
+    throttle_classes = [ScopedRateThrottle]
+
     cluster = django_filters.CharFilter(field_name='division__department__cluster__name', lookup_expr='icontains')
     department = django_filters.CharFilter(field_name='division__department__name', lookup_expr='icontains')
     division = django_filters.CharFilter(field_name='division__name', lookup_expr='icontains')
@@ -26,6 +30,9 @@ class EmployeeFilter(django_filters.FilterSet):
         }
 
 class EmployeeViewSet(viewsets.ModelViewSet):
+    throttle_scope = 'api'
+    throttle_classes = [ScopedRateThrottle]
+
     def get_queryset(self):
         return Employee.objects.select_related(
             'user',
@@ -60,6 +67,25 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             return response
         except Exception as e:
             logger.error(f"Ошибка при получении списка сотрудников: {e}", exc_info=True)
+            raise
+
+    def retrieve(self, request, *args, **kwargs):
+        username = request.user.username if request.user.is_authenticated else 'Anonymous'
+        employee_id = kwargs.get('pk')
+        logger.info(f"Запрос деталей сотрудника ID:{employee_id} от пользователя {username}",
+                   extra={'action': 'employee_retrieve', 
+                          'user': username,
+                          'employee_id': employee_id})
+        try:
+            response = super().retrieve(request, *args, **kwargs)
+            logger.debug(f"Успешно возвращены данные сотрудника ID:{employee_id}")
+            return response
+        except Exception as e:
+            logger.error(f"Ошибка при получении данных сотрудника ID:{employee_id}: {e}", 
+                       extra={'action': 'employee_retrieve_error',
+                              'user': username,
+                              'employee_id': employee_id},
+                       exc_info=True)
             raise
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])

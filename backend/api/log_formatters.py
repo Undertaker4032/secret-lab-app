@@ -1,9 +1,12 @@
 import logging
 import json
 from typing import Dict, Any
+from django.utils.timezone import now
 
 class ExtraFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
+        record.server_time = now().isoformat()
+        
         message = super().format(record)
         
         extra_fields = self.get_extra_fields(record)
@@ -25,6 +28,11 @@ class ExtraFormatter(logging.Formatter):
         extra_fields = {}
         for key, value in record.__dict__.items():
             if key not in standard_fields and not key.startswith('_'):
+                if hasattr(value, '__dict__'):
+                    try:
+                        value = str(value)
+                    except:
+                        value = f"<unserializable {type(value).__name__}>"
                 extra_fields[key] = value
         
         return extra_fields

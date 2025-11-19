@@ -4,11 +4,15 @@ from ..models import Research, ResearchStatus
 from .serializers import ResearchListSerializer, ResearchObjectSerializer, ResearchStatusSerializer
 from api.permissions import ReadOnly, HasRequiredClearanceLevel
 import logging
+from rest_framework.throttling import ScopedRateThrottle
 
 
 logger = logging.getLogger('research')
 
 class ResearchViewSet(viewsets.ModelViewSet):
+    throttle_scope = 'api'
+    throttle_classes = [ScopedRateThrottle]
+
     permission_classes = [HasRequiredClearanceLevel]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -64,6 +68,9 @@ class ResearchViewSet(viewsets.ModelViewSet):
         return super().retrieve(request, *args, **kwargs)
     
 class ResearchStatusViewSet(viewsets.ModelViewSet):
+    throttle_scope = 'api'
+    throttle_classes = [ScopedRateThrottle]
+    
     permission_classes = [ReadOnly]
     queryset = ResearchStatus.objects.all()
     serializer_class = ResearchStatusSerializer
