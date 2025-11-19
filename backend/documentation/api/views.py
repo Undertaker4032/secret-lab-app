@@ -5,7 +5,9 @@ from .serializers import DocumentListSerializer, DocumentObjectSerializer, Docum
 from api.permissions import ReadOnly, HasRequiredClearanceLevel
 import logging
 from rest_framework.throttling import ScopedRateThrottle
-
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from django.core.cache import cache
 
 logger = logging.getLogger('documentation')
 
@@ -44,7 +46,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return DocumentListSerializer
         return DocumentObjectSerializer
-    
+
+    @method_decorator(cache_page(60 * 5))
     def list(self, request, *args, **kwargs):
         username = request.user.username if request.user.is_authenticated else 'Anonymous'
         logger.info(f"Запрос списка документов от пользователя {username}",
@@ -57,6 +60,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
             logger.error(f"Ошибка при получении документов: {e}", exc_info=True)
             raise
 
+    @method_decorator(cache_page(60 * 10))
     def retrieve(self, request, *args, **kwargs):
         username = request.user.username if request.user.is_authenticated else 'Anonymous'
         document = self.get_object()
@@ -72,3 +76,7 @@ class DocumentTypeViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadOnly]
     queryset = DocumentType.objects.all()
     serializer_class = DocumentTypeSerializer
+
+    @method_decorator(cache_page(60 * 60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

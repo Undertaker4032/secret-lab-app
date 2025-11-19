@@ -242,6 +242,11 @@ CACHES = {
     }
 }
 
+REDIS_CONFIG = {
+    'maxmemory': '256mb',
+    'maxmemory-policy': 'allkeys-lru',
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

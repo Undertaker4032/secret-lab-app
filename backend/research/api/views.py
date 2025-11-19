@@ -5,7 +5,8 @@ from .serializers import ResearchListSerializer, ResearchObjectSerializer, Resea
 from api.permissions import ReadOnly, HasRequiredClearanceLevel
 import logging
 from rest_framework.throttling import ScopedRateThrottle
-
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 logger = logging.getLogger('research')
 
@@ -48,7 +49,8 @@ class ResearchViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return ResearchListSerializer
         return ResearchObjectSerializer
-    
+
+    @method_decorator(cache_page(60 * 5))
     def list(self, request, *args, **kwargs):
         logger.info(f"Запрос списка исследований от пользователя: {request.user}")
 
@@ -60,6 +62,7 @@ class ResearchViewSet(viewsets.ModelViewSet):
             logger.error(f"Ошибка при получении исследований: {e}", exc_info=True)
             raise
 
+    @method_decorator(cache_page(60 * 10))
     def retrieve(self, request, *args, **kwargs):
         username = request.user.username if request.user.is_authenticated else 'Anonymous'
         research = self.get_object()
@@ -74,3 +77,7 @@ class ResearchStatusViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadOnly]
     queryset = ResearchStatus.objects.all()
     serializer_class = ResearchStatusSerializer
+
+    @method_decorator(cache_page(60 * 60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

@@ -11,13 +11,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.throttling import ScopedRateThrottle
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from django.core.cache import cache
 
 logger = logging.getLogger('employees')
 
 class EmployeeFilter(django_filters.FilterSet):
-    throttle_scope = 'api'
-    throttle_classes = [ScopedRateThrottle]
-
     cluster = django_filters.CharFilter(field_name='division__department__cluster__name', lookup_expr='icontains')
     department = django_filters.CharFilter(field_name='division__department__name', lookup_expr='icontains')
     division = django_filters.CharFilter(field_name='division__name', lookup_expr='icontains')
@@ -54,7 +54,8 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         'clearance_level__number',
         'division__department__cluster__name'
     ]
-    
+
+    @method_decorator(cache_page(60 * 5))
     def list(self, request, *args, **kwargs):
         logger.info(f"Запрос списка сотрудников от пользователя: {request.user}")
         logger.info(f"Параметры фильтрации: {request.query_params}")
@@ -62,13 +63,14 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         try:
             response = super().list(request, *args, **kwargs)
             data = response.data
-            count = len(data['results'])
+            count = len(data['results']) if 'results' in data else len(data)
             logger.debug(f"Успешно возвращено {count} сотрудников")
             return response
         except Exception as e:
             logger.error(f"Ошибка при получении списка сотрудников: {e}", exc_info=True)
             raise
 
+    @method_decorator(cache_page(60 * 10))
     def retrieve(self, request, *args, **kwargs):
         username = request.user.username if request.user.is_authenticated else 'Anonymous'
         employee_id = kwargs.get('pk')
@@ -108,36 +110,57 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                 {'error': 'Профиль сотрудника не найден'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
 class ClusterViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadOnly]
     queryset = Cluster.objects.all()
     serializer_class = ClusterSerializer
+
+    @method_decorator(cache_page(60 * 60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadOnly]
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
 
+    @method_decorator(cache_page(60 * 60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 class DivisionViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadOnly]
     queryset = Division.objects.all()
     serializer_class = DivisionSerializer
+
+    @method_decorator(cache_page(60 * 60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class PositionViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadOnly]
     queryset = Position.objects.all()
     serializer_class = PositionSerializer
 
+    @method_decorator(cache_page(60 * 60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 class ClearanceLevelViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadOnly]
     queryset = ClearanceLevel.objects.all()
     serializer_class = ClearanceLevelSerializer
 
+    @method_decorator(cache_page(60 * 60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 class EmployeeFiltersAPIView(APIView):
     permission_classes = [ReadOnly]
     serializer_class = EmployeeFilterSerializer
 
+    @method_decorator(cache_page(60 * 60))
     def get(self, request):
         username = request.user.username if request.user.is_authenticated else 'Anonymous'
         logger.info(f"Запрос фильтров сотрудников от пользователя: {username}",

@@ -17,6 +17,7 @@ from employees.models import Employee
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from rest_framework.throttling import ScopedRateThrottle
+from django.core.cache import cache
 
 auth_logger = logging.getLogger('api.auth')
 api_logger = logging.getLogger('api')
@@ -305,23 +306,3 @@ class UserProfileView(RetrieveAPIView):
         
         serializer = self.get_serializer(data)
         return Response(serializer.data)
-    
-from django.core.cache import cache
-
-@api_view(['GET'])
-def cache_status(request):
-    """Эндпоинт для проверки работы кеша"""
-    # Тест записи в кеш
-    test_key = 'cache_test'
-    current_value = cache.get(test_key, 0)
-    new_value = current_value + 1
-    cache.set(test_key, new_value, 60)  # Храним 1 минуту
-    
-    # Информация о кеше
-    cache_info = {
-        'cache_backend': str(cache.__class__),
-        'test_counter': new_value,
-        'redis_working': True,
-    }
-    
-    return Response(cache_info)

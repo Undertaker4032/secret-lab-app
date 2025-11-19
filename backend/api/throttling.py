@@ -1,6 +1,5 @@
 from rest_framework.throttling import SimpleRateThrottle
 import logging
-from .views import TokenObtainPairView
 
 logger = logging.getLogger('api.security')
 
@@ -21,6 +20,3 @@ class AuthThrottle(SimpleRateThrottle):
     def throttle_failure(self):
         logger.warning(f"Превышен лимит запросов для аутентификации: {self.key}")
         return super().throttle_failure()
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-    throttle_classes = [AuthThrottle]
