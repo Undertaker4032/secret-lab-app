@@ -24,7 +24,7 @@ from api.views import LogoutView, UserProfileView, CustomTokenObtainPairView, Co
 from api import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('api/admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('api/', include('api.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
@@ -35,4 +35,5 @@ urlpatterns = [
     path('api/auth/logout/', LogoutView.as_view(), name='logout'),
     path('api/auth/profile/', UserProfileView.as_view(), name='user_profile'),
     path('api/auth/csrf/', views.get_csrf_token, name='get_csrf_token'),
+    path('api/health/', views.health_check, name='health-check'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

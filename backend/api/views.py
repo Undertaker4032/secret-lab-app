@@ -18,6 +18,8 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from rest_framework.throttling import ScopedRateThrottle
 from django.core.cache import cache
+from django.db import connection
+from django.utils import timezone
 
 auth_logger = logging.getLogger('api.auth')
 api_logger = logging.getLogger('api')
@@ -276,7 +278,6 @@ class UserProfileSerializer(serializers.Serializer):
 class UserProfileView(RetrieveAPIView):
     throttle_scope = 'api'
     throttle_classes = [ScopedRateThrottle]
-
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
 
@@ -284,25 +285,70 @@ class UserProfileView(RetrieveAPIView):
         return self.request.user
 
     def retrieve(self, request, *args, **kwargs):
-        username = request.user.username
+        user = request.user
+        username = user.username
+        
+        cache_key = f"user_profile_{user.id}"
+        cache_timeout = 60 * 5
+        
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            api_logger.debug(f"Профиль пользователя {username} получен из кеша",
+                           extra={'action': 'get_profile_cached', 'user': username})
+            return Response(cached_data)
+        
         api_logger.info(f"Получена информация профиля пользователя {username}",
-                        extra={'action': 'get_profile', 'user': username})
+                       extra={'action': 'get_profile', 'user': username})
         
         try:
-            employee = Employee.objects.get(user=request.user)
+            employee = Employee.objects.get(user=user)
             data = {
-                'id': request.user.id,
+                'id': user.id,
                 'username': username,
                 'employee_id': employee.id
             }
         except Employee.DoesNotExist:
             api_logger.warning(f"Профиль сотрудника не найден для пользователя {username}",
-                               extra={'user': username})
+                              extra={'user': username})
             data = {
-                'id': request.user.id,
+                'id': user.id,
                 'username': username,
                 'employee_id': None
             }
         
         serializer = self.get_serializer(data)
-        return Response(serializer.data)
+        response_data = serializer.data
+        
+        cache.set(cache_key, response_data, cache_timeout)
+        api_logger.debug(f"Профиль пользователя {username} сохранен в кеш",
+                        extra={'action': 'profile_cached', 'user': username})
+        
+        return Response(response_data)
+
+@api_view(['GET'])
+def health_check(request):
+    """
+    Health check endpoint that returns service status
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        
+        cache.set('health_check', 'ok', 1)
+        if cache.get('health_check') != 'ok':
+            raise Exception("Redis not working")
+            
+        return Response({
+            "status": "healthy", 
+            "database": "connected",
+            "cache": "connected",
+            "timestamp": timezone.now().isoformat()
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        api_logger.error(f"Health check failed: {str(e)}")
+        return Response({
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": timezone.now().isoformat()
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)

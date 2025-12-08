@@ -1,0 +1,17 @@
+.git
+.gitignore
+*.pyc
+__pycache__
+*.sqlite3
+.env
+.DS_Store
+README.md
+tests/
+scripts/
+logs/
+media/
+staticfiles/
+*.log
+.coverage
+.pytest_cache
+migrations/

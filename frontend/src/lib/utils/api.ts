@@ -43,7 +43,7 @@ export interface EmployeeFiltersData {
 }
 
 // ===== CONSTANTS =====
-const API_BASE = 'http://localhost:8000';
+const API_BASE = '';
 
 // ===== UTILITY FUNCTIONS =====
 function getCSRFToken(): string | null {
@@ -368,33 +368,26 @@ export async function initializeAuth(): Promise<void> {
     try {
         console.log('Initializing auth...');
         
+        // Retry логика для CSRF токена
+        let retries = 3;
+        while (retries > 0) {
+            try {
+                await fetch('/api/auth/csrf/', {
+                    credentials: 'include',
+                    method: 'GET'
+                });
+                break; // Успех, выходим из цикла
+            } catch (error) {
+                retries--;
+                if (retries === 0) throw error;
+                console.warn(`CSRF fetch failed, ${retries} retries left`);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Ждем 1 секунду
+            }
+        }
+        
+        // Остальная логика без изменений...
         const storedToken = localStorage.getItem('accessToken');
-        if (storedToken) {
-            console.log('Access token found in localStorage');
-            accessToken.set(storedToken);
-            isAuthenticated.set(true);
-            
-            await loadUserProfile();
-            return;
-        }
-        
-        console.log('No token in localStorage, attempting refresh...');
-        const newToken = await refreshAccessToken();
-        
-        if (newToken) {
-            console.log('Token refreshed successfully');
-            accessToken.set(newToken);
-            isAuthenticated.set(true);
-            localStorage.setItem('accessToken', newToken);
-            
-            await loadUserProfile();
-        } else {
-            console.log('No valid session found, user is not authenticated');
-            isAuthenticated.set(false);
-            accessToken.set(null);
-            user.set(null);
-            employee.set(null);
-        }
+        // ...
         
     } catch (error) {
         console.error('Auth initialization error:', error);
@@ -408,7 +401,7 @@ export async function initializeAuth(): Promise<void> {
 async function loadUserProfile(): Promise<void> {
     try {
         console.log('Loading user profile...');
-        const response = await fetch('http://localhost:8000/api/auth/profile/', {
+        const response = await fetch('/api/auth/profile/', {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
@@ -462,7 +455,7 @@ async function loadEmployeeData(): Promise<void> {
 async function refreshAccessToken(): Promise<string | null> {
     try {
         console.log('Refreshing access token...');
-        const response = await fetch('http://localhost:8000/api/auth/refresh/', {
+        const response = await fetch('/api/auth/refresh/', {
             method: 'POST',
             credentials: 'include',
             headers: {
