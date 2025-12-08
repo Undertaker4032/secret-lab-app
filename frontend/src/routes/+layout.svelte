@@ -13,6 +13,7 @@
 	let isMenuOpen = $state(false);
 	let scrollbarWidth = $state(0);
 	let authError = $state(false);
+	let backendAvailable = $state(true);
 	
 	function toggleMenu() {
 		isMenuOpen = !isMenuOpen;
@@ -26,12 +27,50 @@
 		try {
 			console.log('Initializing auth...');
 			
-			await fetch('http://localhost:8000/api/auth/csrf/', {
-				credentials: 'include',
-				method: 'GET'
-			});
+			// Сначала проверяем доступность бэкенда
+			try {
+				const healthResponse = await fetch('/api/health/', {
+					credentials: 'include',
+					method: 'GET'
+				});
+				backendAvailable = healthResponse.ok;
+				console.log('Backend health check:', backendAvailable);
+			} catch (error) {
+				console.warn('Backend health check failed:', error);
+				backendAvailable = false;
+			}
+
+			if (!backendAvailable) {
+				console.log('Backend not available, skipping auth initialization');
+				authError = false; // Не показываем ошибку, просто пропускаем аутентификацию
+				authLoading.set(false);
+				return;
+			}
 			
-			console.log('CSRF token obtained');
+			// Получаем CSRF токен с retry логикой
+			let csrfSuccess = false;
+			let retries = 5;
+			
+			while (retries > 0 && !csrfSuccess) {
+				try {
+					const csrfResponse = await fetch('/api/auth/csrf/', {
+						credentials: 'include',
+						method: 'GET'
+					});
+					
+					if (csrfResponse.ok) {
+						csrfSuccess = true;
+						console.log('CSRF token obtained');
+					} else {
+						throw new Error(`CSRF request failed: ${csrfResponse.status}`);
+					}
+				} catch (error) {
+					retries--;
+					if (retries === 0) throw error;
+					console.warn(`CSRF fetch failed, ${retries} retries left`);
+					await new Promise(resolve => setTimeout(resolve, 2000));
+				}
+			}
 			
 			await initializeAuth();
 			console.log('Auth initialized successfully');
@@ -39,7 +78,14 @@
 			
 		} catch (error) {
 			console.error('Auth initialization failed:', error);
-			authError = true;
+			// Не показываем ошибку если бэкенд недоступен или нет активной сессии
+			if (error instanceof Error && 
+				(error.message.includes('Failed to fetch') || 
+				 error.message.includes('401'))) {
+				authError = false;
+			} else {
+				authError = true;
+			}
 		} finally {
 			console.log('Setting authLoading to false');
 			authLoading.set(false);
@@ -78,7 +124,9 @@
 	<div class="flex items-center justify-center min-h-screen bg-rms-black">
 		<div class="text-center">
 			<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
-			<p class="mt-4 text-rms-nobel">Инициализация системы безопасности...</p>
+			<p class="mt-4 text-rms-nobel">
+				{backendAvailable ? 'Инициализация системы безопасности...' : 'Загрузка сервисов...'}
+			</p>
 		</div>
 	</div>
 {:else if authError}

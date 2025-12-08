@@ -10,18 +10,149 @@ logger = logging.getLogger(__name__)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+# Production detection - ДОЛЖНО БЫТЬ В НАЧАЛЕ
+PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
+if PRODUCTION:
+    DEBUG = False
+    
+    # Domain settings
+    DOMAIN_NAME = 'rms-labs.ru'
+    
+    ALLOWED_HOSTS = [
+        DOMAIN_NAME,
+        f'www.{DOMAIN_NAME}',
+        'localhost',
+        '127.0.0.1',
+        'backend',
+        'nginx',
+    ]
+    
+    # Security settings
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_PORT = True
+    
+    # CORS settings for production
+    CORS_ALLOWED_ORIGINS = [
+        f"https://{DOMAIN_NAME}",
+        f"https://www.{DOMAIN_NAME}",
+    ]
+    
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{DOMAIN_NAME}",
+        f"https://www.{DOMAIN_NAME}",
+    ]
+    
+else:
+    # Development settings
+    DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+    
+    ALLOWED_HOSTS = [
+        'localhost',
+        '127.0.0.1',
+        'backend',
+        'nginx',
+        'frontend',
+        '192.168.1.106',
+        '0.0.0.0',
+        '*',
+    ]
+    
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173", 
+        "http://127.0.0.1:5173",
+        "http://localhost:4173",
+        "http://192.168.1.106:3000",
+        "http://192.168.1.106:4173", 
+        "http://192.168.1.106:80",
+    ]
+
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173", 
+        "http://localhost:4173",
+        "http://192.168.1.106:3000",
+        "http://192.168.1.106:4173",
+        "http://192.168.1.106:80",
+    ]
+
+# JWT settings - ПОСЛЕ условия PRODUCTION
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    
+    # Настройки для куки
+    'AUTH_COOKIE_ACCESS': 'access_token',
+    'AUTH_COOKIE_REFRESH': 'refresh_token',
+    'AUTH_COOKIE_HTTP_ONLY': True, # Защита от XSS
+    'AUTH_COOKIE_PATH': '/', # Путь куки
+    'AUTH_COOKIE_MAX_AGE': 60 * 60 * 24 * 7, # 7 дней
+}
+
+# Переопределяем настройки кук для production
+if PRODUCTION:
+    SIMPLE_JWT['AUTH_COOKIE_SECURE'] = True
+    SIMPLE_JWT['AUTH_COOKIE_SAMESITE'] = 'None'
+else:
+    SIMPLE_JWT['AUTH_COOKIE_SECURE'] = False
+    SIMPLE_JWT['AUTH_COOKIE_SAMESITE'] = 'Lax'
+
+# Дополняем CORS для Docker
+if os.getenv('DOCKERIZED', 'False').lower() == 'true':
+    CORS_ALLOWED_ORIGINS.extend([
+        "http://frontend:3000",
+        "http://frontend:4173",
+        "http://nginx:80",
+    ])
+    CSRF_TRUSTED_ORIGINS.extend([
+        "http://frontend:3000", 
+        "http://frontend:4173",
+        "http://nginx:80",
+    ])
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Application definition
 
@@ -82,10 +213,10 @@ WSGI_APPLICATION = 'secret_lab.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'NAME': os.getenv('DB_NAME', 'secret_lab'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'password'),
+        'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
@@ -137,12 +268,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Для дополнительной безопасности
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
@@ -169,83 +294,43 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.ScopedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/hour',
+        'anon': '300/hour',
         'user': '1000/hour',
         'auth': '5/minute',
         'api': '500/hour',
     }
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React/Svelte dev server
-    "http://127.0.0.1:3000",
-    "http://localhost:5173",  # Стандартный порт для Svelte dev-server
-    "http://127.0.0.1:5173",
-    "http://localhost:5000",  # Другие возможные порты
-    "http://localhost:4173",  # Svelte preview
-]
-
-CORS_ALLOW_CREDENTIALS = True
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:4173",
-]
-
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-]
-
-from datetime import timedelta
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': True,
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',
-    
-    # Настройки для куки
-    'AUTH_COOKIE_ACCESS': 'access_token',
-    'AUTH_COOKIE_REFRESH': 'refresh_token',
-    'AUTH_COOKIE_SECURE': not DEBUG, # True в production для HTTPS
-    'AUTH_COOKIE_HTTP_ONLY': True, # Защита от XSS
-    'AUTH_COOKIE_SAMESITE': 'Lax', # Защита от CSRF
-    'AUTH_COOKIE_PATH': '/', # Путь куки
-    'AUTH_COOKIE_MAX_AGE': 60 * 60 * 24 * 7, # 7 дней
-}
-
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': os.getenv('REDIS_URL', 'redis://redis:6379/1'),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'SOCKET_CONNECT_TIMEOUT': 5,
             'SOCKET_TIMEOUT': 5,
             'RETRY_ON_TIMEOUT': True,
+            'MAX_CONNECTIONS': 40,
+            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
         },
-        'KEY_PREFIX': 'myapp'
+        'KEY_PREFIX': 'secret_lab',
+        'TIMEOUT': 60 * 15,
     }
 }
 
 REDIS_CONFIG = {
-    'maxmemory': '256mb',
+    'maxmemory': '500mb',
     'maxmemory-policy': 'allkeys-lru',
+    'maxmemory-samples': 5,
+    'save': '900 1 300 10 60 10000',
 }
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 300
+CACHE_MIDDLEWARE_KEY_PREFIX = 'secret_lab'
 
 LOGGING = {
     'version': 1,
@@ -386,3 +471,6 @@ try:
                 extra={'debug_mode': DEBUG, 'allowed_hosts': ALLOWED_HOSTS})
 except Exception as e:
     print(f"Ошибка при инициализации логирования: {e}")
+
+logger.info(f"DEBUG mode: {DEBUG}")
+logger.info(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
