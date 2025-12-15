@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "${DB_PASSWORD}"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - /home/deploy/data/postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
     restart: unless-stopped
@@ -20,7 +20,7 @@ services:
     image: redis:7-alpine
     command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
     volumes:
-      - redis_data:/data
+      - /home/deploy/data/redis_data:/data
     networks:
       - app-network
     restart: unless-stopped
@@ -31,13 +31,14 @@ services:
       retries: 3
 
   backend:
-    image: ghcr.io/undertaker4032/secret-lab-app-backend:latest
-    pull_policy: always
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     env_file:
       - .env
     volumes:
-      - backend_static:/app/staticfiles
-      - backend_media:/app/media
+      - /home/deploy/data/backend_static:/app/staticfiles
+      - /home/deploy/data/backend_media:/app/media
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,8 +55,9 @@ services:
       start_period: 40s
 
   frontend:
-    image: ghcr.io/undertaker4032/secret-lab-app-frontend:latest
-    pull_policy: always
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
     environment:
       VITE_API_URL: ''
       PORT: '3000'
@@ -74,8 +76,9 @@ services:
       start_period: 30s
 
   nginx:
-    image: ghcr.io/undertaker4032/secret-lab-app-nginx:latest
-    pull_policy: always
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     ports:
       - "80:80"
       - "443:443"
@@ -83,10 +86,8 @@ services:
       - backend
       - frontend
     volumes:
-      - backend_static:/backend_static
-      - backend_media:/backend_media
-      - nginx_logs:/var/log/nginx
-      - /home/deploy/RMS-site/nginx/ssl:/etc/nginx/ssl:ro
+      - /home/deploy/data/backend_static:/backend_static
+      - /home/deploy/data/backend_media:/backend_media
     networks:
       - app-network
     restart: unless-stopped
@@ -94,10 +95,3 @@ services:
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  postgres_data:
-  redis_data:
-  backend_static:
-  backend_media:
-  nginx_logs:
