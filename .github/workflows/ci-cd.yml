@@ -140,19 +140,21 @@ jobs:
         script: |
           cd /home/deploy/RMS-site
           
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.PROD_ENV_FILE }}" > .env
+          
+          docker logout ghcr.io 2>/dev/null || true
+          echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u Undertaker4032 --password-stdin
           
           docker compose -f docker-compose.prod.yml pull
-          
           docker compose -f docker-compose.prod.yml down
-          
-          docker compose -f docker-compose.prod.yml exec backend python manage.py migrate
-          
-          docker compose -f docker-compose.prod.yml run --rm backend python manage.py collectstatic --noinput
-          
           docker compose -f docker-compose.prod.yml up -d
           
-          docker image prune -f
+          docker compose -f docker-compose.prod.yml exec backend python manage.py migrate
+          docker compose -f docker-compose.prod.yml exec backend python manage.py collectstatic --noinput
           
-          sleep 10
+          docker compose -f docker-compose.prod.yml restart backend
+          
+          docker image prune -f
+          docker logout ghcr.io
+          sleep 5
           docker compose -f docker-compose.prod.yml ps
