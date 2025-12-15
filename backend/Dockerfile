@@ -21,6 +21,8 @@ RUN pip install gunicorn==21.2.0
 
 COPY . .
 
+COPY ./static /app/static/
+
 EXPOSE 8000
 
 CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 --workers 3 secret_lab.wsgi:application"]
