@@ -53,10 +53,10 @@
     <!-- АДМИНИСТРАЦИЯ -->
     <section class="py-3">
         <h1 class="text-4xl font-bold my-3">Руководство</h1>
-        <img src={admin01} alt="Административный корпус" class="py-3 px-10 max-w-3/4 flex place-self-center">
+        <img src={admin01} alt="Административный корпус" class="py-3 px-10 w-full h-auto md:max-w-3/4 flex place-self-center">
         
         <div class="relative">
-            <img src={back04} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0 md:w-full">
+            <img src={back04} alt="Фон" class="absolute inset-0 w-full h-auto object-cover opacity-10 z-0 md:w-auto md:h-full">
             <div class="relative z-10">
                 <p class="font-bold text-xl mb-4">Высшее руководство RMS-12:</p>
                 <ul class="list-disc list-inside space-y-2 text-lg">
@@ -79,10 +79,10 @@
     <!-- НАУЧНЫЙ КЛАСТЕР -->
     <section class="py-3">
         <h2 class="text-3xl font-bold my-3">Научный Кластер</h2>
-        <img src={lab02} alt="Научная лаборатория" class="py-3 px-10 max-w-3/4 flex place-self-center">
+        <img src={lab02} alt="Научная лаборатория" class="py-3 px-10 w-full h-auto md:max-w-3/4 flex place-self-center">
         
         <div class="relative">
-            <img src={back01} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0 md:w-full">
+            <img src={back01} alt="Фон" class="absolute inset-0 w-full h-auto object-cover opacity-10 z-0 md:w-auto md:h-full">
             <div class="relative z-10">
                 <p class="mb-4">
                     Сердце и ум RMS. Учёные, теоретики и инженеры
@@ -134,10 +134,10 @@
     <!-- КЛАСТЕР БЕЗОПАСНОСТИ -->
     <section class="py-3">
         <h2 class="text-3xl font-bold my-3">Кластер Безопасности</h2>
-        <img src={sec01} alt="Системы безопасности" class="py-3 px-10 max-w-3/4 flex place-self-center">
+        <img src={sec01} alt="Системы безопасности" class="py-3 px-10 w-full h-auto md:max-w-3/4 flex place-self-center">
 
         <div class="relative">
-            <img src={back02} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0 md:w-full">
+            <img src={back02} alt="Фон" class="absolute inset-0 w-full h-auto object-cover opacity-10 z-0 md:w-auto md:h-full">
             <div class="relative z-10">
                 <p class="mb-4">
                     Щит RMS. Элита, обеспечивающая
@@ -171,10 +171,10 @@
     <!-- ОПЕРАЦИОННЫЙ КЛАСТЕР -->
     <section class="py-3">
         <h2 class="text-3xl font-bold my-3">Операционный Кластер</h2>
-        <img src={it01} alt="Инфраструктура" class="py-3 px-10 max-w-3/4 flex place-self-center">
+        <img src={it01} alt="Инфраструктура" class="py-3 px-10 w-full h-auto md:max-w-3/4 flex place-self-center">
 
         <div class="relative">
-            <img src={back03} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0 md:w-full">
+            <img src={back03} alt="Фон" class="absolute inset-0 w-full h-auto object-cover opacity-10 z-0 md:w-auto md:h-full">
             <div class="relative z-10">
                 <p class="mb-4">
                     Кровь и нервная система RMS. Специалисты,
@@ -216,7 +216,7 @@
 
     <section class="py-3">
         <h1 class="text-4xl font-bold my-3">Карьера в RMS</h1>
-        <img src={lab01} alt="Карьера" class="py-3 px-10 max-w-3/4 flex place-self-center">
+        <img src={lab01} alt="Карьера" class="py-3 px-10 w-full h-auto md:max-w-3/4 flex place-self-center">
 
         Мы всегда находимся в поиске талантливых и
         целеустремлённых специалистов, готовых

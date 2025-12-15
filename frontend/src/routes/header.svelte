@@ -46,7 +46,7 @@
     </button>
     
     <!-- Центр: логотип -->
-    <a href="/" class="absolute left-1/2 transform -translate-x-1/2 flex items-center">
+    <a href="/" class="absolute left-1/2 transform -translate-x-1/2 flex items-center px-2">
       <img src={logo} alt="RMS Laboratories" class="h-10 hover:opacity-90 transition-opacity">
     </a>
     
