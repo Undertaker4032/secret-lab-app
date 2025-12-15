@@ -21,7 +21,7 @@ RUN pip install gunicorn==21.2.0
 
 COPY . .
 
-COPY ./static /app/static/
+# COPY ./static /app/static/
 
 EXPOSE 8000
 
