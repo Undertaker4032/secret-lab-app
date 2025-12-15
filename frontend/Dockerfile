@@ -1,21 +1,23 @@
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
 FROM node:22-alpine
 
 WORKDIR /app
 
-# Копирование package файлов
-COPY package*.json ./
-RUN npm ci
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/package*.json ./
 
-# Копирование исходного кода
-COPY . .
-
-# Убедимся что adapter-node установлен
-RUN npm install @sveltejs/adapter-node
-
-# Сборка приложения
-RUN npm run build
+RUN npm ci --only=production
 
 EXPOSE 3000
 
-# Запуск приложения
 CMD ["node", "build"]

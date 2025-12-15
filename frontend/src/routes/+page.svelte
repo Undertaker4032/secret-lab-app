@@ -57,7 +57,7 @@
         <img src={admin01} alt="Административный корпус" class="py-3 px-10 max-w-3/4 flex place-self-center">
         
         <div class="relative">
-            <img src={back04} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0">
+            <img src={back04} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0 md:w-full">
             <div class="relative z-10">
                 <p class="font-bold text-xl mb-4">Высшее руководство RMS-12:</p>
                 <ul class="list-disc list-inside space-y-2 text-lg">
@@ -83,7 +83,7 @@
         <img src={lab02} alt="Научная лаборатория" class="py-3 px-10 max-w-3/4 flex place-self-center">
         
         <div class="relative">
-            <img src={back01} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0">
+            <img src={back01} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0 md:w-full">
             <div class="relative z-10">
                 <p class="mb-4">
                     Сердце и ум RMS. Учёные, теоретики и инженеры
@@ -138,7 +138,7 @@
         <img src={sec01} alt="Системы безопасности" class="py-3 px-10 max-w-3/4 flex place-self-center">
 
         <div class="relative">
-            <img src={back02} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0">
+            <img src={back02} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0 md:w-full">
             <div class="relative z-10">
                 <p class="mb-4">
                     Щит RMS. Элита, обеспечивающая
@@ -175,7 +175,7 @@
         <img src={it01} alt="Инфраструктура" class="py-3 px-10 max-w-3/4 flex place-self-center">
 
         <div class="relative">
-            <img src={back03} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0">
+            <img src={back03} alt="Фон" class="flex place-self-center absolute inset-0 h-full object-cover opacity-10 z-0 md:w-full">
             <div class="relative z-10">
                 <p class="mb-4">
                     Кровь и нервная система RMS. Специалисты,

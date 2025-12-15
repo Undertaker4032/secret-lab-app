@@ -1,4 +1,3 @@
-# Игнорирование файлов с секретами и конфигураций
 .env
 .env.local
 .env.production
@@ -8,23 +7,19 @@ config.yaml
 *.key
 *.pem
 
-# Игнорирование базы данных (SQLite) и журналов
 *.sqlite3
 *.db
 *.log
 logs/
 
-# Игнорирование медиа-файлов (загружаемых пользователями)
 media/
 uploads/
 
-# Игнорирование статических файлов (собираются при деплое)
 staticfiles/
 __pycache__/
 *.pyc
 *.pyo
 
-# Игнорирование зависимостей и виртуального окружения
 venv/
 env/
 .myvenv/
@@ -36,18 +31,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Игнорирование файлов IDE/редакторов
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Игнорирование системных файлов
 .DS_Store
 Thumbs.db
 
-# Игнорирование файлов сборки/деплоя
 dist/
 build/
 *.tar.gz
@@ -55,5 +47,4 @@ build/
 .coverage
 htmlcov/
 
-# Игнорирование VSCodeCounter
 .VSCodeCounter
