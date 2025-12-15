@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: secret_lab_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "XGa9s9AbMMo2Qs"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
