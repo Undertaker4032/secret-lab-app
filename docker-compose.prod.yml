@@ -86,6 +86,7 @@ services:
       - backend_static:/backend_static
       - backend_media:/backend_media
       - nginx_logs:/var/log/nginx
+      - /home/deploy/RMS-site/nginx/ssl:/etc/nginx/ssl:ro
     networks:
       - app-network
     restart: unless-stopped
