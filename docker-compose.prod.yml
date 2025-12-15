@@ -31,7 +31,7 @@ services:
       retries: 3
 
   backend:
-    image: ghcr.io/undertaker4032/secret-lab-app/backend:latest
+    image: ghcr.io/undertaker4032/secret-lab-app-backend:latest
     pull_policy: always
     env_file:
       - .env
@@ -54,7 +54,7 @@ services:
       start_period: 40s
 
   frontend:
-    image: ghcr.io/undertaker4032/secret-lab-app/frontend:latest
+    image: ghcr.io/undertaker4032/secret-lab-app-frontend:latest
     pull_policy: always
     environment:
       VITE_API_URL: ''
@@ -74,7 +74,7 @@ services:
       start_period: 30s
 
   nginx:
-    image: ghcr.io/undertaker4032/secret-lab-app/nginx:latest
+    image: ghcr.io/undertaker4032/secret-lab-app-nginx:latest
     pull_policy: always
     ports:
       - "80:80"
