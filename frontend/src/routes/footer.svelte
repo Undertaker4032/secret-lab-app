@@ -1,5 +1,4 @@
 <script lang="ts">
-    import '../app.css';
     import logo from "$lib/assets/NewLogo1W.png";
 </script>
 
