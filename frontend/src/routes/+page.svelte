@@ -1,5 +1,5 @@
 <script>
-    import '../app.css';
+    import '%app.css';
     import icon from '$lib/assets/logo-eye1.svg';
     import lab00 from '$lib/main/Lab00.webp';
     import lab02 from '$lib/main/Lab02.svg';
