@@ -1,4 +1,5 @@
 <script lang="ts">
+	import "../app.css"
 	import icon from '$lib/assets/logo-eye1.svg';
 	import Header from './header.svelte';
 	import Footer from './footer.svelte';
