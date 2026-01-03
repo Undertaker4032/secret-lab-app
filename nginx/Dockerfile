@@ -2,6 +2,8 @@ FROM nginx:alpine
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
+RUN rm -f /etc/nginx/conf.d/*.conf
+
 RUN mkdir -p /var/log/nginx
 
 EXPOSE 80 443
