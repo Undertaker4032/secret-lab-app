@@ -114,7 +114,7 @@ jobs:
     - name: Build and push frontend
       uses: docker/build-push-action@v5
       with:
-        context: ./frontend
+        context: .
         push: true
         tags: |
           ghcr.io/undertaker4032/secret-lab-app-frontend:latest
