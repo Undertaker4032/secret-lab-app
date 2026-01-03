@@ -21,6 +21,8 @@ class EmployeeFilter(django_filters.FilterSet):
     cluster = django_filters.CharFilter(field_name='division__department__cluster__name', lookup_expr='icontains')
     department = django_filters.CharFilter(field_name='division__department__name', lookup_expr='icontains')
     division = django_filters.CharFilter(field_name='division__name', lookup_expr='icontains')
+
+    queryset = Cluster.objects.all().order_by('id')
     
     class Meta:
         model = Employee
@@ -159,6 +161,8 @@ class ClearanceLevelViewSet(viewsets.ModelViewSet):
 class EmployeeFiltersAPIView(APIView):
     permission_classes = [ReadOnly]
     serializer_class = EmployeeFilterSerializer
+
+    queryset = Cluster.objects.all().order_by('id')
 
     @method_decorator(cache_page(60 * 60))
     def get(self, request):

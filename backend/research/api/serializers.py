@@ -35,7 +35,7 @@ class ResearchObjectSerializer(serializers.ModelSerializer):
                   'updated_date']
     read_only_fields = ['created_date', 'updated_date']
 
-    def get_team_members(self, obj):
+    def get_team_members(self, obj) -> list:
         return [employee.name for employee in obj.team.all()]
     
 class ResearchStatusSerializer(serializers.ModelSerializer):

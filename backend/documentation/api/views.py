@@ -77,6 +77,8 @@ class DocumentTypeViewSet(viewsets.ModelViewSet):
     queryset = DocumentType.objects.all()
     serializer_class = DocumentTypeSerializer
 
+    queryset = DocumentType.objects.all().order_by('id')
+
     @method_decorator(cache_page(60 * 60))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)

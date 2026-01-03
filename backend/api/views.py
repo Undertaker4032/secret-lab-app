@@ -29,8 +29,10 @@ def get_csrf_token(request):
     return JsonResponse({'csrfToken': get_token(request)})
 
 class CustomTokenObtainPairView(TokenObtainPairView):
-    throttle_scope = 'auth'
+    throttle_scope = 'api'
     throttle_classes = [ScopedRateThrottle]
+
+    serializer_class = None
 
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
@@ -131,6 +133,8 @@ class CookieTokenRefreshView(APIView):
     throttle_scope = 'auth'
     throttle_classes = [ScopedRateThrottle]
 
+    serializer_class = None
+
     def post(self, request):
         try:
             refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
@@ -223,6 +227,8 @@ class LogoutView(APIView):
     throttle_classes = [ScopedRateThrottle]
 
     permission_classes = [IsAuthenticated]
+
+    serializer_class = None
 
     def post(self, request):
         username = request.user.username

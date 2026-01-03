@@ -1,3 +1,4 @@
+# backend/Dockerfile
 FROM python:3.13-slim
 
 ENV PYTHONUNBUFFERED=1
@@ -10,6 +11,7 @@ RUN apt-get update \
         python3-dev \
         libpq-dev \
         curl \
+        netcat-traditional \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -17,12 +19,16 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install gunicorn==21.2.0
 
 COPY . .
 
-# COPY ./static /app/static/
+# Создаем директорию для логов
+RUN mkdir -p logs
+
+# Копируем и настраиваем entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 --workers 3 secret_lab.wsgi:application"]
+ENTRYPOINT ["/entrypoint.sh"]
