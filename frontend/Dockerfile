@@ -1,18 +1,17 @@
-FROM node:22-alpine AS builder
+FROM node:22-alpine
 
 WORKDIR /app
 
 COPY ./frontend/package*.json ./
+
 RUN npm ci
 
 COPY ./frontend/ ./
+
 RUN npm run build
 
-FROM nginx:alpine
-
-COPY --from=builder /app/build /usr/share/nginx/html
-COPY ./frontend/nginx-frontend.conf /etc/nginx/conf.d/default.conf
+RUN ls -la build/ && test -f build/index.js
 
 EXPOSE 3000
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "build/index.js"]
