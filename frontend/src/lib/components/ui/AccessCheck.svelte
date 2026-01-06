@@ -3,8 +3,6 @@
   import lottie from 'lottie-web';
   import { fade } from 'svelte/transition';
   import { api } from '$lib/utils/api';
-  import { authLoading, isAuthenticated, accessToken, user, employee } from '$lib/stores/auth';
-  import { get } from 'svelte/store';
 
   let { 
     itemId, 
@@ -112,7 +110,7 @@
     }
   }
 
-  async function startAccessCheck(): Promise<void> {
+  async function checkAccess(): Promise<void> {
     if (accessCheckCompleted || accessCheckStarted) return;
     
     accessCheckStarted = true;
@@ -120,29 +118,37 @@
     
     try {
       console.log(`=== STARTING ACCESS CHECK ===`);
+      console.log(`Checking access for ${itemType} with ID: ${itemId}`);
       
       animationStep = 'checking';
       switchAnimation('Access', true);
       
-      console.log(`Making API request for ${itemType} with ID: ${itemId}`);
+      let hasAccess = false;
       
-      if (itemType === 'document') {
-        await api.getDocumentationObject(itemId);
-      } else if (itemType === 'research') {
-        await api.getResearchObject(itemId);
+      try {
+        if (itemType === 'document') {
+          await api.getDocumentationObject(itemId);
+          hasAccess = true;
+        } else if (itemType === 'research') {
+          await api.getResearchObject(itemId);
+          hasAccess = true;
+        }
+      } catch (err: any) {
+        console.log('Access check result:', err.status);
+        throw err;
       }
       
-      console.log('Access granted by API');
-      
-      animationStep = 'success';
-      switchAnimation('AccessGranted', false);
-      
-      accessCheckCompleted = true;
-      
-      setTimeout(() => {
-        console.log('Calling onAccessGranted');
-        onAccessGranted();
-      }, 1500);
+      if (hasAccess) {
+        console.log('Access granted');
+        animationStep = 'success';
+        switchAnimation('AccessGranted', false);
+        accessCheckCompleted = true;
+        
+        setTimeout(() => {
+          console.log('Calling onAccessGranted');
+          onAccessGranted();
+        }, 1500);
+      }
       
     } catch (err: any) {
       console.error('Access check error:', err);
@@ -152,14 +158,17 @@
       } else if (err.status === 404) {
         errorMessage = 'Объект не найден';
       } else if (err.status === 401) {
-        errorMessage = 'Ошибка авторизации';
+        errorMessage = 'Для доступа к этому объекту требуется авторизация';
+      } else if (err.status === 500) {
+        errorMessage = 'Ошибка сервера';
+      } else if (err.message?.includes('Network')) {
+        errorMessage = 'Проблемы с подключением к серверу';
       } else {
         errorMessage = 'Произошла ошибка при проверке доступа';
       }
       
       animationStep = 'fail';
       switchAnimation('AccessDenied', false);
-      
       accessCheckCompleted = true;
       
       setTimeout(() => {
@@ -171,8 +180,7 @@
 
   onMount(async () => {
     console.log('AccessCheck mounted');
-
-    if (accessCheckStarted || accessCheckCompleted) return;
+    console.log(`Item: ${itemType} ID: ${itemId}`);
 
     await waitForAnimationContainer();
 
@@ -184,39 +192,7 @@
       console.warn('Failed to load AccessStart animation, continuing...');
     }
 
-    const currentToken = get(accessToken);
-    const authenticated = get(isAuthenticated);
-    const loading = get(authLoading);
-    
-    if (loading) {
-      const unsubscribe = authLoading.subscribe((isLoading) => {
-        if (!isLoading) {
-          unsubscribe();
-          checkAuthAndStartAccessCheck();
-        }
-      });
-    } else {
-      checkAuthAndStartAccessCheck();
-    }
-
-    function checkAuthAndStartAccessCheck() {
-      if (!currentToken || !authenticated) {
-        console.log('No auth token or not authenticated');
-        errorMessage = 'Требуется авторизация';
-        
-        animationStep = 'fail';
-        switchAnimation('AccessDenied', false);
-        
-        accessCheckCompleted = true;
-        
-        setTimeout(() => {
-          onAccessDenied();
-        }, 2000);
-      } else {
-        console.log('User authenticated, starting access check');
-        startAccessCheck();
-      }
-    }
+    checkAccess();
   });
 
   onDestroy(() => {

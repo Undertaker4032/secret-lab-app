@@ -4,7 +4,7 @@ export async function handle({ event, resolve }) {
         return new Response(JSON.stringify({
             traffic_advice: {
                 proxy: {
-                    url_prefix: 'https://yourdomain.com/'
+                    url_prefix: 'https://rms-labs.ru/'
                 }
             }
         }), {
