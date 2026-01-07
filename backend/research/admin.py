@@ -10,7 +10,7 @@ class ResearchStatusAdmin(admin.ModelAdmin):
 class ResearchAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'lead', 'status', 'created_date', 'required_clearance')
     list_filter = ('status', 'created_date', 'required_clearance', 'lead')
-    search_fields = ('title', 'description', 'objectives', 'lead__name')
+    search_fields = ('title', 'content', 'lead__name')
     readonly_fields = ('created_date', 'updated_date')
     filter_horizontal = ('team',)
     date_hierarchy = 'created_date'
@@ -18,17 +18,13 @@ class ResearchAdmin(admin.ModelAdmin):
     
     fieldsets = (
         (None, {
-            'fields': ('title', 'description', 'objectives')
+            'fields': ('title', 'content')
         }),
         ('Команда и статус', {
             'fields': ('lead', 'team', 'status')
         }),
         ('Сроки и доступ', {
             'fields': ('created_date', 'updated_date', 'required_clearance')
-        }),
-        ('Результаты', {
-            'fields': ('findings',),
-            'classes': ('collapse',)
         }),
     )
     
