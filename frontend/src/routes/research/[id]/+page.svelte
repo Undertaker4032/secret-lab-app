@@ -259,7 +259,7 @@
                     <p class="text-rms-nobel italic">Исследование не содержит описания</p>
                   </div>
                 {:else}
-                  <div class="markdown-content">
+                  <div class="markdown-content override-headers">
                     {@html renderedContent}
                   </div>
                 {/if}
@@ -359,7 +359,7 @@
 </div>
 
 <style>
-  .markdown-content {
+.markdown-content.override-headers {
     color: #ffffff;
     line-height: 1.8;
     font-size: 18px;
@@ -369,74 +369,79 @@
     letter-spacing: 0.01em;
   }
   
-  .markdown-content h1 {
-    font-family: "Times New Roman", Times, serif;
-    font-size: 2.8em;
-    font-weight: 900;
-    margin-top: 2.8em;
-    margin-bottom: 1.2em;
-    padding-bottom: 0.6em;
-    border-bottom: 3px solid #555;
-    color: #ffffff;
-    line-height: 1.2;
-    letter-spacing: 0.03em;
+  .markdown-content.override-headers h1,
+  .markdown-content.override-headers h2,
+  .markdown-content.override-headers h3,
+  .markdown-content.override-headers h4,
+  .markdown-content.override-headers h5,
+  .markdown-content.override-headers h6 {
+    all: initial;
+    font-family: "Times New Roman", Times, serif !important;
+    display: block !important;
+    unicode-bidi: isolate !important;
+    color: #ffffff !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.03em !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-sizing: border-box !important;
   }
   
-  .markdown-content h2 {
-    font-family: "Times New Roman", Times, serif;
-    font-size: 2.3em;
-    font-weight: 900;
-    margin-top: 2.5em;
-    margin-bottom: 1em;
-    padding-bottom: 0.5em;
-    border-bottom: 2px solid #555;
-    color: #ffffff;
-    line-height: 1.3;
-    letter-spacing: 0.02em;
+  .markdown-content.override-headers h1 {
+    font-size: 2.8em !important;
+    font-weight: 900 !important;
+    margin-top: 2.8em !important;
+    margin-bottom: 1.2em !important;
+    padding-bottom: 0.6em !important;
+    border-bottom: 3px solid #555 !important;
   }
   
-  .markdown-content h3 {
-    font-family: "Times New Roman", Times, serif;
-    font-size: 1.9em;
-    font-weight: 800;
-    margin-top: 2.2em;
-    margin-bottom: 0.9em;
-    color: #ffffff;
-    line-height: 1.3;
-    letter-spacing: 0.02em;
+  .markdown-content.override-headers h2 {
+    font-size: 2.3em !important;
+    font-weight: 900 !important;
+    margin-top: 2.5em !important;
+    margin-bottom: 1em !important;
+    padding-bottom: 0.5em !important;
+    border-bottom: 2px solid #555 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.02em !important;
   }
   
-  .markdown-content h4 {
-    font-family: "Times New Roman", Times, serif;
-    font-size: 1.6em;
-    font-weight: 700;
-    margin-top: 2em;
-    margin-bottom: 0.8em;
-    color: #ffffff;
-    line-height: 1.4;
+  .markdown-content.override-headers h3 {
+    font-size: 1.9em !important;
+    font-weight: 800 !important;
+    margin-top: 2.2em !important;
+    margin-bottom: 0.9em !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.02em !important;
   }
   
-  .markdown-content h5 {
-    font-family: "Times New Roman", Times, serif;
-    font-size: 1.4em;
-    font-weight: 700;
-    margin-top: 1.8em;
-    margin-bottom: 0.7em;
-    color: #ffffff;
-    line-height: 1.4;
+  .markdown-content.override-headers h4 {
+    font-size: 1.6em !important;
+    font-weight: 700 !important;
+    margin-top: 2em !important;
+    margin-bottom: 0.8em !important;
+    line-height: 1.4 !important;
   }
   
-  .markdown-content h6 {
-    font-family: "Times New Roman", Times, serif;
-    font-size: 1.3em;
-    font-weight: 700;
-    margin-top: 1.6em;
-    margin-bottom: 0.6em;
-    color: #ffffff;
-    line-height: 1.4;
+  .markdown-content.override-headers h5 {
+    font-size: 1.4em !important;
+    font-weight: 700 !important;
+    margin-top: 1.8em !important;
+    margin-bottom: 0.7em !important;
+    line-height: 1.4 !important;
   }
   
-  .markdown-content p {
+  .markdown-content.override-headers h6 {
+    font-size: 1.3em !important;
+    font-weight: 700 !important;
+    margin-top: 1.6em !important;
+    margin-bottom: 0.6em !important;
+    line-height: 1.4 !important;
+  }
+  
+  .markdown-content.override-headers p {
     margin-bottom: 2em;
     margin-top: 0;
     text-align: justify;
@@ -448,41 +453,42 @@
     -ms-hyphens: auto;
   }
   
-  .markdown-content h1 + p,
-  .markdown-content h2 + p,
-  .markdown-content h3 + p,
-  .markdown-content h4 + p,
-  .markdown-content h5 + p,
-  .markdown-content h6 + p {
+  .markdown-content.override-headers h1 + p,
+  .markdown-content.override-headers h2 + p,
+  .markdown-content.override-headers h3 + p,
+  .markdown-content.override-headers h4 + p,
+  .markdown-content.override-headers h5 + p,
+  .markdown-content.override-headers h6 + p {
     margin-top: 0.5em;
   }
   
-  .markdown-content p + h1,
-  .markdown-content p + h2,
-  .markdown-content p + h3,
-  .markdown-content p + h4,
-  .markdown-content p + h5,
-  .markdown-content p + h6 {
-    margin-top: 3em;
+  .markdown-content.override-headers p + h1,
+  .markdown-content.override-headers p + h2,
+  .markdown-content.override-headers p + h3,
+  .markdown-content.override-headers p + h4,
+  .markdown-content.override-headers p + h5,
+  .markdown-content.override-headers p + h6 {
+    margin-top: 3em !important;
   }
   
-  .markdown-content ul, .markdown-content ol {
+  .markdown-content.override-headers ul,
+  .markdown-content.override-headers ol {
     margin-bottom: 2em;
     margin-top: 1em;
     padding-left: 2.5em;
     line-height: 1.8;
   }
   
-  .markdown-content li {
+  .markdown-content.override-headers li {
     margin-bottom: 0.8em;
     line-height: 1.8;
   }
   
-  .markdown-content li > p {
+  .markdown-content.override-headers li > p {
     margin-bottom: 0.5em;
   }
   
-  .markdown-content blockquote {
+  .markdown-content.override-headers blockquote {
     font-family: "Times New Roman", Times, serif;
     border-left: 5px solid #777;
     padding-left: 1.8em;
@@ -496,12 +502,12 @@
     font-size: 1.1em;
   }
   
-  .markdown-content blockquote p {
+  .markdown-content.override-headers blockquote p {
     margin-bottom: 0.8em;
     line-height: 1.7;
   }
   
-  .markdown-content code {
+  .markdown-content.override-headers code {
     font-family: 'Courier New', Courier, monospace;
     background-color: #2a2a2a;
     padding: 0.25em 0.5em;
@@ -512,7 +518,7 @@
     font-weight: 500;
   }
   
-  .markdown-content pre {
+  .markdown-content.override-headers pre {
     font-family: 'Courier New', Courier, monospace;
     background-color: #2a2a2a;
     padding: 1.5em;
@@ -523,14 +529,14 @@
     line-height: 1.5;
   }
   
-  .markdown-content pre code {
+  .markdown-content.override-headers pre code {
     background-color: transparent;
     padding: 0;
     border: none;
     font-size: 0.95em;
   }
   
-  .markdown-content a {
+  .markdown-content.override-headers a {
     color: #6ea8fe;
     text-decoration: none;
     border-bottom: 1px solid #6ea8fe;
@@ -538,13 +544,13 @@
     font-weight: 500;
   }
   
-  .markdown-content a:hover {
+  .markdown-content.override-headers a:hover {
     color: #93c5fd;
     border-bottom: 2px solid #93c5fd;
     text-decoration: none;
   }
   
-  .markdown-content table {
+  .markdown-content.override-headers table {
     font-family: "Times New Roman", Times, serif;
     border-collapse: collapse;
     width: 100%;
@@ -553,25 +559,26 @@
     border: 1px solid #3a3a3a;
   }
   
-  .markdown-content th, .markdown-content td {
+  .markdown-content.override-headers th,
+  .markdown-content.override-headers td {
     border: 1px solid #3a3a3a;
     padding: 1em;
     text-align: left;
     line-height: 1.5;
   }
   
-  .markdown-content th {
+  .markdown-content.override-headers th {
     background-color: #333;
     font-weight: 700;
     color: #fff;
     font-size: 1.05em;
   }
   
-  .markdown-content tr:nth-child(even) {
+  .markdown-content.override-headers tr:nth-child(even) {
     background-color: rgba(255, 255, 255, 0.03);
   }
   
-  .markdown-content img {
+  .markdown-content.override-headers img {
     max-width: 100%;
     height: auto;
     border-radius: 6px;
@@ -580,7 +587,7 @@
     border: 1px solid #3a3a3a;
   }
   
-  .markdown-content hr {
+  .markdown-content.override-headers hr {
     border: none;
     border-top: 3px solid #555;
     margin: 3em 0;
@@ -588,37 +595,38 @@
     opacity: 0.7;
   }
   
-  .markdown-content strong {
+  .markdown-content.override-headers strong {
     font-weight: 700;
     color: #f0f0f0;
   }
   
-  .markdown-content em {
+  .markdown-content.override-headers em {
     font-style: italic;
     color: #e0e0e0;
   }
   
-  .markdown-content del {
+  .markdown-content.override-headers del {
     color: #999;
     text-decoration: line-through;
   }
   
-  .markdown-content sup, .markdown-content sub {
+  .markdown-content.override-headers sup,
+  .markdown-content.override-headers sub {
     font-size: 0.75em;
     line-height: 0;
     position: relative;
     vertical-align: baseline;
   }
   
-  .markdown-content sup {
+  .markdown-content.override-headers sup {
     top: -0.6em;
   }
   
-  .markdown-content sub {
+  .markdown-content.override-headers sub {
     bottom: -0.3em;
   }
   
-  .markdown-content p:first-of-type {
+  .markdown-content.override-headers p:first-of-type {
     font-size: 1.05em;
     line-height: 1.9;
   }
@@ -658,27 +666,27 @@
   .toc-item.level-6 { padding-left: 7.5em; }
   
   @media (max-width: 768px) {
-    .markdown-content {
+    .markdown-content.override-headers {
       font-size: 17px;
       line-height: 1.8;
     }
     
-    .markdown-content h1 {
-      font-size: 2.3em;
-      margin-top: 2.5em;
-      margin-bottom: 1em;
+    .markdown-content.override-headers h1 {
+      font-size: 2.3em !important;
+      margin-top: 2.5em !important;
+      margin-bottom: 1em !important;
     }
     
-    .markdown-content h2 {
-      font-size: 1.9em;
-      margin-top: 2.2em;
+    .markdown-content.override-headers h2 {
+      font-size: 1.9em !important;
+      margin-top: 2.2em !important;
     }
     
-    .markdown-content h3 {
-      font-size: 1.6em;
+    .markdown-content.override-headers h3 {
+      font-size: 1.6em !important;
     }
     
-    .markdown-content p {
+    .markdown-content.override-headers p {
       margin-bottom: 1.8em;
     }
     
