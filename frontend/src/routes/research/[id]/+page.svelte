@@ -616,4 +616,29 @@
   .toc-item.level-4 { padding-left: 3.6em; }
   .toc-item.level-5 { padding-left: 4.8em; }
   .toc-item.level-6 { padding-left: 6em; }
+
+  @media (max-width: 768px) {
+  .markdown-content {
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  
+  .markdown-content h1 {
+    font-size: 2em;
+    margin-top: 2em;
+  }
+  
+  .markdown-content h2 {
+    font-size: 1.7em;
+  }
+  
+  .markdown-content h3 {
+    font-size: 1.4em;
+  }
+  
+  /* Оглавление скрываем на мобильных */
+  .toc-item {
+    font-size: 0.9em;
+  }
+}
 </style>
