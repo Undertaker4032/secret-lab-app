@@ -344,159 +344,261 @@
 </div>
 
 <style>
-  /* Стили для Markdown контента */
   .markdown-content {
     color: #ffffff;
-    line-height: 1.7;
-    font-size: 16px;
+    line-height: 1.8;
+    font-size: 17px;
+    font-family: "Times New Roman", Times, serif;
+    text-align: justify;
+    text-justify: inter-word;
+    letter-spacing: 0.01em;
   }
   
+  /* Заголовки с более выраженной иерархией */
   .markdown-content h1 {
-    font-size: 2em;
-    font-weight: bold;
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-    padding-bottom: 0.3em;
-    border-bottom: 1px solid #333;
-    color: #ffffff;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 2.5em;
+    font-weight: 700;
+    margin-top: 2.5em;
+    margin-bottom: 0.8em;
+    padding-bottom: 0.4em;
+    border-bottom: 2px solid #444;
+    color: #f0f0f0;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
   }
   
   .markdown-content h2 {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-    color: #ffffff;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 2em;
+    font-weight: 700;
+    margin-top: 2.2em;
+    margin-bottom: 0.7em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #444;
+    color: #f0f0f0;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
   }
   
   .markdown-content h3 {
-    font-size: 1.25em;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 1.6em;
     font-weight: 600;
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-    color: #ffffff;
+    margin-top: 2em;
+    margin-bottom: 0.6em;
+    color: #f0f0f0;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
   }
   
-  .markdown-content h4, .markdown-content h5, .markdown-content h6 {
-    font-size: 1.1em;
+  .markdown-content h4 {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 1.4em;
     font-weight: 600;
-    margin-top: 1em;
+    margin-top: 1.8em;
     margin-bottom: 0.5em;
-    color: #ffffff;
+    color: #f0f0f0;
+    line-height: 1.4;
+  }
+  
+  .markdown-content h5, .markdown-content h6 {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-top: 1.6em;
+    margin-bottom: 0.5em;
+    color: #f0f0f0;
+    line-height: 1.4;
   }
   
   .markdown-content p {
-    margin-bottom: 1em;
+    margin-bottom: 1.5em;
     text-align: justify;
+    text-justify: inter-word;
+    line-height: 1.8;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
   }
   
   .markdown-content ul, .markdown-content ol {
-    margin-bottom: 1em;
-    padding-left: 2em;
+    margin-bottom: 1.5em;
+    margin-top: 0.5em;
+    padding-left: 2.5em;
+    line-height: 1.8;
   }
   
   .markdown-content li {
+    margin-bottom: 0.8em;
+    line-height: 1.8;
+  }
+  
+  .markdown-content li > p {
     margin-bottom: 0.5em;
   }
   
   .markdown-content blockquote {
-    border-left: 4px solid #555;
-    padding-left: 1em;
-    margin: 1em 0;
-    color: #cccccc;
+    font-family: "Times New Roman", Times, serif;
+    border-left: 4px solid #666;
+    padding-left: 1.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    margin: 1.5em 0;
+    color: #d4d4d4;
     font-style: italic;
+    background-color: rgba(255, 255, 255, 0.05);
+    line-height: 1.7;
+  }
+  
+  .markdown-content blockquote p {
+    margin-bottom: 0.5em;
   }
   
   .markdown-content code {
-    background-color: #2d2d2d;
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
     font-family: 'Courier New', Courier, monospace;
+    background-color: #2a2a2a;
+    padding: 0.25em 0.5em;
+    border-radius: 4px;
     font-size: 0.9em;
     color: #f8f8f2;
+    border: 1px solid #3a3a3a;
   }
   
   .markdown-content pre {
-    background-color: #2d2d2d;
-    padding: 1em;
-    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #2a2a2a;
+    padding: 1.2em;
+    border-radius: 6px;
     overflow-x: auto;
-    margin: 1em 0;
+    margin: 1.5em 0;
+    border: 1px solid #3a3a3a;
+    line-height: 1.5;
   }
   
   .markdown-content pre code {
     background-color: transparent;
     padding: 0;
-    color: #f8f8f2;
+    border: none;
+    font-size: 0.95em;
   }
   
   .markdown-content a {
-    color: #60a5fa;
+    color: #6ea8fe;
     text-decoration: none;
-    border-bottom: 1px dotted #60a5fa;
+    border-bottom: 1px solid #6ea8fe;
+    transition: all 0.2s ease;
   }
   
   .markdown-content a:hover {
     color: #93c5fd;
-    border-bottom-style: solid;
+    border-bottom: 2px solid #93c5fd;
+    text-decoration: none;
   }
   
   .markdown-content table {
+    font-family: "Times New Roman", Times, serif;
     border-collapse: collapse;
     width: 100%;
-    margin: 1em 0;
-    background-color: #2d2d2d;
+    margin: 1.5em 0;
+    background-color: #2a2a2a;
+    border: 1px solid #3a3a3a;
   }
   
   .markdown-content th, .markdown-content td {
-    border: 1px solid #555;
-    padding: 0.75em;
+    border: 1px solid #3a3a3a;
+    padding: 0.9em;
     text-align: left;
+    line-height: 1.5;
   }
   
   .markdown-content th {
-    background-color: #3d3d3d;
-    font-weight: bold;
+    background-color: #333;
+    font-weight: 600;
+    color: #fff;
+  }
+  
+  .markdown-content tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.03);
   }
   
   .markdown-content img {
     max-width: 100%;
     height: auto;
-    border-radius: 5px;
-    margin: 1em 0;
+    border-radius: 6px;
+    margin: 1.5em 0;
+    display: block;
+    border: 1px solid #3a3a3a;
   }
   
   .markdown-content hr {
     border: none;
-    border-top: 1px solid #555;
-    margin: 2em 0;
+    border-top: 2px solid #444;
+    margin: 2.5em 0;
+    height: 0;
   }
   
-  /* Стили для оглавления */
+  .markdown-content strong {
+    font-weight: 700;
+    color: #f0f0f0;
+  }
+  
+  .markdown-content em {
+    font-style: italic;
+    color: #e0e0e0;
+  }
+  
+  .markdown-content del {
+    color: #999;
+    text-decoration: line-through;
+  }
+  
+  .markdown-content sup, .markdown-content sub {
+    font-size: 0.8em;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  
+  .markdown-content sup {
+    top: -0.5em;
+  }
+  
+  .markdown-content sub {
+    bottom: -0.25em;
+  }
+  
   .toc-item {
     display: block;
-    padding: 0.5em 0;
-    color: #999;
+    padding: 0.6em 0;
+    color: #aaa;
     text-decoration: none;
     border-left: 3px solid transparent;
-    transition: all 0.2s;
-    font-size: 0.9em;
+    transition: all 0.2s ease;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 0.95em;
+    line-height: 1.5;
   }
   
   .toc-item:hover {
     color: #ffffff;
-    border-left-color: #555;
+    border-left-color: #666;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding-left: 0.5em;
   }
   
   .toc-item.active {
     color: #ffffff;
-    border-left-color: #60a5fa;
-    font-weight: 500;
+    border-left-color: #6ea8fe;
+    font-weight: 600;
+    background-color: rgba(110, 168, 254, 0.1);
+    padding-left: 0.5em;
   }
   
-  .toc-item.level-2 { padding-left: 1em; }
-  .toc-item.level-3 { padding-left: 2em; }
-  .toc-item.level-4 { padding-left: 3em; }
-  .toc-item.level-5 { padding-left: 4em; }
-  .toc-item.level-6 { padding-left: 5em; }
+  .toc-item.level-2 { padding-left: 1.2em; }
+  .toc-item.level-3 { padding-left: 2.4em; }
+  .toc-item.level-4 { padding-left: 3.6em; }
+  .toc-item.level-5 { padding-left: 4.8em; }
+  .toc-item.level-6 { padding-left: 6em; }
 </style>

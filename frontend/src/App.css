@@ -8,6 +8,14 @@
   src: url('/fonts/Roboto-VariableFont_wdth,wght.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Times New Roman';
+  src: url('/fonts/times.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-rms-black: #111111;
   --color-rms-cod-gray: #1a1a1a;
