@@ -178,12 +178,46 @@
 
           <!-- Содержимое исследования -->
           <div class="p-8 space-y-8">
-            {#if researchData.content}
+            {#if researchData.description}
               <section>
-                <h2 class="text-xl font-bold text-rms-white mb-4 pb-2 border-b border-rms-mine-shaft">Содержание:</h2>
+                <h2 class="text-xl font-bold text-rms-white mb-4 pb-2 border-b border-rms-mine-shaft">Описание исследования</h2>
                 <div class="prose prose-invert max-w-none">
                   <div class="space-y-4 text-rms-white leading-relaxed">
-                    {#each researchData.content.split('\n') as paragraph}
+                    {#each researchData.description.split('\n') as paragraph}
+                      {#if paragraph.trim()}
+                        <p class="text-justify">{paragraph}</p>
+                      {:else}
+                        <div class="h-4"></div>
+                      {/if}
+                    {/each}
+                  </div>
+                </div>
+              </section>
+            {/if}
+
+            {#if researchData.objectives}
+              <section>
+                <h2 class="text-xl font-bold text-rms-white mb-4 pb-2 border-b border-rms-mine-shaft">Цели исследования</h2>
+                <div class="prose prose-invert max-w-none">
+                  <div class="space-y-4 text-rms-white leading-relaxed">
+                    {#each researchData.objectives.split('\n') as paragraph}
+                      {#if paragraph.trim()}
+                        <p class="text-justify">{paragraph}</p>
+                      {:else}
+                        <div class="h-4"></div>
+                      {/if}
+                    {/each}
+                  </div>
+                </div>
+              </section>
+            {/if}
+
+            {#if researchData.findings}
+              <section>
+                <h2 class="text-xl font-bold text-rms-white mb-4 pb-2 border-b border-rms-mine-shaft">Результаты и выводы</h2>
+                <div class="prose prose-invert max-w-none">
+                  <div class="space-y-4 text-rms-white leading-relaxed">
+                    {#each researchData.findings.split('\n') as paragraph}
                       {#if paragraph.trim()}
                         <p class="text-justify">{paragraph}</p>
                       {:else}

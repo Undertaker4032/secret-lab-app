@@ -16,7 +16,7 @@ class DocumentType(models.Model):
 class Documentation(models.Model):
     title = models.CharField(max_length=256, verbose_name='Название Документа')
     type = models.ForeignKey(DocumentType, on_delete=models.PROTECT, verbose_name='Тип Документа')
-    content = models.TextField(verbose_name='Содержание Документа')
+    content = models.TextField(verbose_name='Содержание')
     author = models.ForeignKey(Employee, blank=True, on_delete=models.PROTECT, verbose_name="Автор")
     created_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата Создания')
     updated_date = models.DateTimeField(auto_now=True, verbose_name='Дата Обновления')
