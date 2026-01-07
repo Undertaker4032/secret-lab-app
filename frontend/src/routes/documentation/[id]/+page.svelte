@@ -18,6 +18,7 @@
   let tableOfContents = $state<Array<{ id: string; text: string; level: number }>>([]);
   let showToc = $state(true);
   let activeHeadingId = $state('');
+  let shouldSetupObserver = $state(false);
 
   const pageTitle = $derived(
     documentData?.title 
@@ -75,24 +76,17 @@
   }
 
   async function handleAccessGranted(): Promise<void> {
-  try {
-    isLoading = true;
-    documentData = await api.getDocumentationObject(getDocumentId());
-    
-    if (documentData?.content) {
-      renderedContent = markdownToHtml(documentData.content);
+    try {
+      isLoading = true;
+      documentData = await api.getDocumentationObject(getDocumentId());
       
-      tableOfContents = getTableOfContents(renderedContent);
-      
-      $effect(() => {
-        if (renderedContent && accessGranted) {
-          setTimeout(() => {
-            const observer = setupIntersectionObserver();
-            return () => observer?.disconnect();
-          }, 300);
-        }
-      });
-    }
+      // Рендер Markdown
+      if (documentData?.content) {
+        renderedContent = markdownToHtml(documentData.content);
+        tableOfContents = getTableOfContents(renderedContent);
+
+        shouldSetupObserver = true;
+      }
       
       accessGranted = true;
       showAccessCheck = false;
@@ -109,6 +103,22 @@
     accessDenied = true;
     showAccessCheck = false;
   }
+
+  // Отдельный эффект для настройки IntersectionObserver
+  $effect(() => {
+    if (shouldSetupObserver && renderedContent && accessGranted) {
+      const timer = setTimeout(() => {
+        const observer = setupIntersectionObserver();
+        return () => {
+          observer?.disconnect();
+        };
+      }, 300);
+      
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  });
 </script>
 
 <svelte:head>
