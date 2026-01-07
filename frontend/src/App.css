@@ -37,3 +37,14 @@ header {
   width: 100%;
   z-index: 1000;
 }
+
+.markdown-content.override-headers h1,
+.markdown-content.override-headers h2,
+.markdown-content.override-headers h3,
+.markdown-content.override-headers h4,
+.markdown-content.override-headers h5,
+.markdown-content.override-headers h6 {
+  all: unset !important;
+  font-family: "Times New Roman", Times, serif !important;
+  display: block !important;
+}
