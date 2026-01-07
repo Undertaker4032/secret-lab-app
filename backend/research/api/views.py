@@ -25,9 +25,7 @@ class ResearchViewSet(viewsets.ModelViewSet):
     search_fields = ['title',
                      'lead__name',
                      'team__name',
-                     'description',
-                     'findings',
-                     'objectives']
+                     'content']
     
     ordering_fields = ['title',
                        'lead__division__name',

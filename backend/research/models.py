@@ -15,15 +15,13 @@ class ResearchStatus(models.Model):
 # Модель Исследование
 class Research(models.Model):
     title = models.CharField(max_length=256, verbose_name='Название Исследования')
-    description = models.TextField(verbose_name='Содержание Исследования')
-    objectives = models.TextField(verbose_name='Цели Исследования')
+    status = models.ForeignKey(ResearchStatus, on_delete=models.PROTECT, verbose_name='Статус Исследования')
+    content = models.TextField(verbose_name='Содержание Исследования')
     lead = models.ForeignKey(Employee, on_delete=models.PROTECT, verbose_name="Руководитель Исследования")
     team = models.ManyToManyField(Employee, related_name='research_team', blank=True, verbose_name='Участники Исследования')
     created_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата Создания')
     updated_date = models.DateTimeField(auto_now=True, verbose_name='Дата Обновления')
-    status = models.ForeignKey(ResearchStatus, on_delete=models.PROTECT, verbose_name='Статус Исследования')
     required_clearance = models.ForeignKey(ClearanceLevel, on_delete=models.PROTECT, verbose_name='Уровень Допуска')
-    findings = models.TextField(verbose_name='Результаты Исследования')
 
     class Meta:
         verbose_name = 'Исследование'
