@@ -347,73 +347,83 @@
   .markdown-content {
     color: #ffffff;
     line-height: 1.8;
-    font-size: 17px;
+    font-size: 18px;
     font-family: "Times New Roman", Times, serif;
     text-align: justify;
     text-justify: inter-word;
     letter-spacing: 0.01em;
   }
   
-  /* Заголовки с более выраженной иерархией */
   .markdown-content h1 {
     font-family: "Times New Roman", Times, serif;
-    font-size: 2.5em;
-    font-weight: 700;
-    margin-top: 2.5em;
-    margin-bottom: 0.8em;
-    padding-bottom: 0.4em;
-    border-bottom: 2px solid #444;
-    color: #f0f0f0;
-    line-height: 1.3;
-    letter-spacing: 0.02em;
+    font-size: 2.8em;
+    font-weight: 900;
+    margin-top: 2.8em;
+    margin-bottom: 1.2em;
+    padding-bottom: 0.6em;
+    border-bottom: 3px solid #555;
+    color: #ffffff;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
   }
   
   .markdown-content h2 {
     font-family: "Times New Roman", Times, serif;
-    font-size: 2em;
-    font-weight: 700;
-    margin-top: 2.2em;
-    margin-bottom: 0.7em;
-    padding-bottom: 0.3em;
-    border-bottom: 1px solid #444;
-    color: #f0f0f0;
+    font-size: 2.3em;
+    font-weight: 900;
+    margin-top: 2.5em;
+    margin-bottom: 1em;
+    padding-bottom: 0.5em;
+    border-bottom: 2px solid #555;
+    color: #ffffff;
     line-height: 1.3;
     letter-spacing: 0.02em;
   }
   
   .markdown-content h3 {
     font-family: "Times New Roman", Times, serif;
-    font-size: 1.6em;
-    font-weight: 600;
-    margin-top: 2em;
-    margin-bottom: 0.6em;
-    color: #f0f0f0;
-    line-height: 1.4;
-    letter-spacing: 0.01em;
+    font-size: 1.9em;
+    font-weight: 800;
+    margin-top: 2.2em;
+    margin-bottom: 0.9em;
+    color: #ffffff;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
   }
   
   .markdown-content h4 {
     font-family: "Times New Roman", Times, serif;
-    font-size: 1.4em;
-    font-weight: 600;
-    margin-top: 1.8em;
-    margin-bottom: 0.5em;
-    color: #f0f0f0;
+    font-size: 1.6em;
+    font-weight: 700;
+    margin-top: 2em;
+    margin-bottom: 0.8em;
+    color: #ffffff;
     line-height: 1.4;
   }
   
-  .markdown-content h5, .markdown-content h6 {
+  .markdown-content h5 {
     font-family: "Times New Roman", Times, serif;
-    font-size: 1.2em;
-    font-weight: 600;
+    font-size: 1.4em;
+    font-weight: 700;
+    margin-top: 1.8em;
+    margin-bottom: 0.7em;
+    color: #ffffff;
+    line-height: 1.4;
+  }
+  
+  .markdown-content h6 {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 1.3em;
+    font-weight: 700;
     margin-top: 1.6em;
-    margin-bottom: 0.5em;
-    color: #f0f0f0;
+    margin-bottom: 0.6em;
+    color: #ffffff;
     line-height: 1.4;
   }
   
   .markdown-content p {
-    margin-bottom: 1.5em;
+    margin-bottom: 2em;
+    margin-top: 0;
     text-align: justify;
     text-justify: inter-word;
     line-height: 1.8;
@@ -423,9 +433,27 @@
     -ms-hyphens: auto;
   }
   
-  .markdown-content ul, .markdown-content ol {
-    margin-bottom: 1.5em;
+  .markdown-content h1 + p,
+  .markdown-content h2 + p,
+  .markdown-content h3 + p,
+  .markdown-content h4 + p,
+  .markdown-content h5 + p,
+  .markdown-content h6 + p {
     margin-top: 0.5em;
+  }
+  
+  .markdown-content p + h1,
+  .markdown-content p + h2,
+  .markdown-content p + h3,
+  .markdown-content p + h4,
+  .markdown-content p + h5,
+  .markdown-content p + h6 {
+    margin-top: 3em;
+  }
+  
+  .markdown-content ul, .markdown-content ol {
+    margin-bottom: 2em;
+    margin-top: 1em;
     padding-left: 2.5em;
     line-height: 1.8;
   }
@@ -441,19 +469,21 @@
   
   .markdown-content blockquote {
     font-family: "Times New Roman", Times, serif;
-    border-left: 4px solid #666;
-    padding-left: 1.5em;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-    margin: 1.5em 0;
-    color: #d4d4d4;
+    border-left: 5px solid #777;
+    padding-left: 1.8em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    margin: 2.5em 0;
+    color: #e0e0e0;
     font-style: italic;
     background-color: rgba(255, 255, 255, 0.05);
     line-height: 1.7;
+    font-size: 1.1em;
   }
   
   .markdown-content blockquote p {
-    margin-bottom: 0.5em;
+    margin-bottom: 0.8em;
+    line-height: 1.7;
   }
   
   .markdown-content code {
@@ -464,15 +494,16 @@
     font-size: 0.9em;
     color: #f8f8f2;
     border: 1px solid #3a3a3a;
+    font-weight: 500;
   }
   
   .markdown-content pre {
     font-family: 'Courier New', Courier, monospace;
     background-color: #2a2a2a;
-    padding: 1.2em;
+    padding: 1.5em;
     border-radius: 6px;
     overflow-x: auto;
-    margin: 1.5em 0;
+    margin: 2em 0;
     border: 1px solid #3a3a3a;
     line-height: 1.5;
   }
@@ -489,6 +520,7 @@
     text-decoration: none;
     border-bottom: 1px solid #6ea8fe;
     transition: all 0.2s ease;
+    font-weight: 500;
   }
   
   .markdown-content a:hover {
@@ -501,22 +533,23 @@
     font-family: "Times New Roman", Times, serif;
     border-collapse: collapse;
     width: 100%;
-    margin: 1.5em 0;
+    margin: 2em 0;
     background-color: #2a2a2a;
     border: 1px solid #3a3a3a;
   }
   
   .markdown-content th, .markdown-content td {
     border: 1px solid #3a3a3a;
-    padding: 0.9em;
+    padding: 1em;
     text-align: left;
     line-height: 1.5;
   }
   
   .markdown-content th {
     background-color: #333;
-    font-weight: 600;
+    font-weight: 700;
     color: #fff;
+    font-size: 1.05em;
   }
   
   .markdown-content tr:nth-child(even) {
@@ -527,16 +560,17 @@
     max-width: 100%;
     height: auto;
     border-radius: 6px;
-    margin: 1.5em 0;
+    margin: 2.5em 0;
     display: block;
     border: 1px solid #3a3a3a;
   }
   
   .markdown-content hr {
     border: none;
-    border-top: 2px solid #444;
-    margin: 2.5em 0;
+    border-top: 3px solid #555;
+    margin: 3em 0;
     height: 0;
+    opacity: 0.7;
   }
   
   .markdown-content strong {
@@ -555,75 +589,87 @@
   }
   
   .markdown-content sup, .markdown-content sub {
-    font-size: 0.8em;
+    font-size: 0.75em;
     line-height: 0;
     position: relative;
     vertical-align: baseline;
   }
   
   .markdown-content sup {
-    top: -0.5em;
+    top: -0.6em;
   }
   
   .markdown-content sub {
-    bottom: -0.25em;
+    bottom: -0.3em;
+  }
+  
+  .markdown-content p:first-of-type {
+    font-size: 1.05em;
+    line-height: 1.9;
   }
   
   .toc-item {
     display: block;
-    padding: 0.6em 0;
+    padding: 0.8em 0;
     color: #aaa;
     text-decoration: none;
-    border-left: 3px solid transparent;
+    border-left: 4px solid transparent;
     transition: all 0.2s ease;
     font-family: "Times New Roman", Times, serif;
     font-size: 0.95em;
-    line-height: 1.5;
+    line-height: 1.6;
+    margin-bottom: 0.3em;
   }
   
   .toc-item:hover {
     color: #ffffff;
-    border-left-color: #666;
+    border-left-color: #777;
     background-color: rgba(255, 255, 255, 0.05);
-    padding-left: 0.5em;
+    padding-left: 0.8em;
   }
   
   .toc-item.active {
     color: #ffffff;
     border-left-color: #6ea8fe;
-    font-weight: 600;
-    background-color: rgba(110, 168, 254, 0.1);
-    padding-left: 0.5em;
+    font-weight: 700;
+    background-color: rgba(110, 168, 254, 0.15);
+    padding-left: 0.8em;
   }
   
-  .toc-item.level-2 { padding-left: 1.2em; }
-  .toc-item.level-3 { padding-left: 2.4em; }
-  .toc-item.level-4 { padding-left: 3.6em; }
-  .toc-item.level-5 { padding-left: 4.8em; }
-  .toc-item.level-6 { padding-left: 6em; }
-
+  .toc-item.level-2 { padding-left: 1.5em; }
+  .toc-item.level-3 { padding-left: 3em; }
+  .toc-item.level-4 { padding-left: 4.5em; }
+  .toc-item.level-5 { padding-left: 6em; }
+  .toc-item.level-6 { padding-left: 7.5em; }
+  
   @media (max-width: 768px) {
-  .markdown-content {
-    font-size: 16px;
-    line-height: 1.7;
+    .markdown-content {
+      font-size: 17px;
+      line-height: 1.8;
+    }
+    
+    .markdown-content h1 {
+      font-size: 2.3em;
+      margin-top: 2.5em;
+      margin-bottom: 1em;
+    }
+    
+    .markdown-content h2 {
+      font-size: 1.9em;
+      margin-top: 2.2em;
+    }
+    
+    .markdown-content h3 {
+      font-size: 1.6em;
+    }
+    
+    .markdown-content p {
+      margin-bottom: 1.8em;
+    }
+    
+    .toc-item {
+      font-size: 0.9em;
+      padding: 0.6em 0;
+    }
   }
-  
-  .markdown-content h1 {
-    font-size: 2em;
-    margin-top: 2em;
-  }
-  
-  .markdown-content h2 {
-    font-size: 1.7em;
-  }
-  
-  .markdown-content h3 {
-    font-size: 1.4em;
-  }
-  
-  /* Оглавление скрываем на мобильных */
-  .toc-item {
-    font-size: 0.9em;
-  }
-}
 </style>
