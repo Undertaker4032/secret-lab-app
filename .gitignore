@@ -3,3 +3,4 @@
 .env.old
 ssl
 docker-compose.old.yml
+.VSCodeCounter
