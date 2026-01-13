@@ -8,8 +8,24 @@ from rest_framework.throttling import ScopedRateThrottle
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.core.cache import cache
+import django_filters
 
 logger = logging.getLogger('documentation')
+
+class DocumentFilter(django_filters.FilterSet):
+    type = django_filters.NumberFilter(field_name='type__id')
+    author_division = django_filters.NumberFilter(field_name='author__division__id')
+    required_clearance = django_filters.NumberFilter(field_name='required_clearance__id')
+    created_date = django_filters.DateFilter(field_name='created_date')
+    
+    class Meta:
+        model = Documentation
+        fields = {
+            'type': ['exact'],
+            'author_division': ['exact'],
+            'required_clearance': ['exact'],
+            'created_date': ['exact'],
+        }
 
 class DocumentViewSet(viewsets.ModelViewSet):
     throttle_scope = 'api'
@@ -17,10 +33,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
     permission_classes = [HasRequiredClearanceLevel]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['type__name',
-                        'author__division__name',
-                        'required_clearance__number',
-                        'created_date']
+    filterset_class = DocumentFilter
     
     search_fields = ['title',
                      'author__name',

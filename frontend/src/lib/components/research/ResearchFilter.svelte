@@ -17,42 +17,46 @@
 
   let researchStatuses: ResearchStatus[] = [];
   let clearanceLevels: ClearanceLevel[] = [];
+  let divisions: { id: number; name: string }[] = [];
   let loading = true;
 
   onMount(async () => {
-    try {
-      await loadFilterData();
-    } catch (error) {
-      console.error('Error loading research filter data:', error);
-    } finally {
-      loading = false;
-    }
-  });
+  try {
+    await loadFilterData();
+  } catch (error) {
+    console.error('Error loading research filter data:', error);
+  } finally {
+    loading = false;
+  }
+});
 
   async function loadFilterData() {
     try {
-      const statusesResponse = await api.getResearchStatuses();
-      researchStatuses = statusesResponse.results;
+      const divisionsResponse = await api.get('/api/employees/divisions/');
+      divisions = divisionsResponse.results;
+      
+      const typesResponse = await api.get('/api/research/research-statuses/');
+      researchStatuses = typesResponse.results;
 
-      const clearanceResponse = await api.getClearanceLevels();
+      const clearanceResponse = await api.get('/api/employees/clearance-level/');
       clearanceLevels = clearanceResponse.results.sort((a, b) => b.number - a.number);
     } catch (error) {
-      console.error('Failed to load research filter data:', error);
+      console.error('Failed to load filter data:', error);
     }
-  }
 
   function handleSubmit() {
     const filters = cleanFilters({
       search: searchTerm,
-      status__name: selectedStatus,
-      lead__division__name: selectedDivision,
-      required_clearance__number: selectedClearance,
+      status: selectedStatus,
+      lead_division: selectedDivision,
+      required_clearance: selectedClearance,
       created_date: selectedDate,
       ordering: selectedSort
     });
     
     dispatch('filterChange', filters);
   }
+
 
   function handleClear() {
     searchTerm = '';
@@ -125,13 +129,13 @@
           <label for="division" class="block text-sm font-medium text-rms-white mb-2">
             Отдел руководителя
           </label>
-          <input
+          <select>
             id="division"
             type="text"
             bind:value={selectedDivision}
-            placeholder="В разработке..."
+            placeholder="Название отдела..."
             class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white placeholder-rms-dove-gray focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
-          />
+          </select>
         </div>
 
         <div>

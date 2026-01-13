@@ -18,17 +18,20 @@ from django.core.cache import cache
 logger = logging.getLogger('employees')
 
 class EmployeeFilter(django_filters.FilterSet):
-    cluster = django_filters.CharFilter(field_name='division__department__cluster__name', lookup_expr='icontains')
-    department = django_filters.CharFilter(field_name='division__department__name', lookup_expr='icontains')
-    division = django_filters.CharFilter(field_name='division__name', lookup_expr='icontains')
+    # Используем NumberFilter и ссылаемся на id связанных объектов
+    cluster = django_filters.NumberFilter(field_name='division__department__cluster__id')
+    department = django_filters.NumberFilter(field_name='division__department__id')
+    division = django_filters.NumberFilter(field_name='division__id')
+    clearance_level = django_filters.NumberFilter(field_name='clearance_level__id')
 
-    queryset = Cluster.objects.all().order_by('id')
-    
     class Meta:
         model = Employee
         fields = {
             'is_active': ['exact'],
-            'clearance_level__number': ['exact'],
+            'cluster': ['exact'],       # Добавлено
+            'department': ['exact'],    # Добавлено
+            'division': ['exact'],      # Добавлено
+            'clearance_level': ['exact'],
         }
 
 class EmployeeViewSet(viewsets.ModelViewSet):

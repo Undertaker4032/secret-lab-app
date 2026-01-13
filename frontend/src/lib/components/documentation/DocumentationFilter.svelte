@@ -19,17 +19,20 @@
   let loading = true;
 
   onMount(async () => {
-    try {
-      await loadFilterData();
-    } catch (error) {
-      console.error('Error loading filter data:', error);
-    } finally {
-      loading = false;
-    }
-  });
+  try {
+    await loadFilterData();
+  } catch (error) {
+    console.error('Error loading research filter data:', error);
+  } finally {
+    loading = false;
+  }
+});
 
   async function loadFilterData() {
     try {
+      const divisionsResponse = await api.get('/api/employees/divisions/');
+      divisions = divisionsResponse.results;
+      
       const typesResponse = await api.get('/api/documentation/document-types/');
       documentTypes = typesResponse.results;
 
@@ -38,20 +41,19 @@
     } catch (error) {
       console.error('Failed to load filter data:', error);
     }
-  }
 
   function handleSubmit() {
-    const filters = cleanFilters({
-      search: searchTerm,
-      type__name: selectedType,
-      author__division__name: selectedDivision,
-      required_clearance__number: selectedClearance,
-      created_date: selectedDate,
-      ordering: selectedSort
-    });
-    
-    dispatch('filterChange', filters);
-  }
+  const filters = cleanFilters({
+    search: searchTerm,
+    type: selectedType,
+    author_division: selectedDivision,
+    required_clearance: selectedClearance,
+    created_date: selectedDate,
+    ordering: selectedSort
+  });
+  
+  dispatch('filterChange', filters);
+}
 
   function handleClear() {
     searchTerm = '';
@@ -124,13 +126,13 @@
           <label for="division" class="block text-sm font-medium text-rms-white mb-2">
             Отдел автора
           </label>
-          <input
+          <select>
             id="division"
             type="text"
             bind:value={selectedDivision}
             placeholder="Название отдела..."
             class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white placeholder-rms-dove-gray focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
-          />
+          </select>
         </div>
 
         <div>

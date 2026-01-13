@@ -7,8 +7,24 @@ import logging
 from rest_framework.throttling import ScopedRateThrottle
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+import django_filters
 
 logger = logging.getLogger('research')
+
+class ResearchFilter(django_filters.FilterSet):
+    status = django_filters.NumberFilter(field_name='status__id')
+    lead_division = django_filters.NumberFilter(field_name='lead__division__id')
+    required_clearance = django_filters.NumberFilter(field_name='required_clearance__id')
+    created_date = django_filters.DateFilter(field_name='created_date')
+    
+    class Meta:
+        model = Research
+        fields = {
+            'status': ['exact'],
+            'lead_division': ['exact'],
+            'required_clearance': ['exact'],
+            'created_date': ['exact'],
+        }
 
 class ResearchViewSet(viewsets.ModelViewSet):
     throttle_scope = 'api'
@@ -17,10 +33,7 @@ class ResearchViewSet(viewsets.ModelViewSet):
     permission_classes = [HasRequiredClearanceLevel]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['lead__division__name',
-                        'status__name',
-                        'required_clearance__number',
-                        'created_date']
+    filterset_class = ResearchFilter
     
     search_fields = ['title',
                      'lead__name',
