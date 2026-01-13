@@ -41,6 +41,7 @@
     } catch (error) {
       console.error('Failed to load filter data:', error);
     }
+  }
 
   function handleSubmit() {
   const filters = cleanFilters({
