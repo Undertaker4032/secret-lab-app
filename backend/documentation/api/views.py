@@ -20,6 +20,7 @@ class DocumentFilter(django_filters.FilterSet):
     
     class Meta:
         model = Documentation
+        fields = {}
 
 class DocumentViewSet(viewsets.ModelViewSet):
     throttle_scope = 'api'

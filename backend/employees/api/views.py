@@ -25,6 +25,7 @@ class EmployeeFilter(django_filters.FilterSet):
 
     class Meta:
         model = Employee
+        fields = {}
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     throttle_scope = 'api'

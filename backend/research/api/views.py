@@ -19,6 +19,7 @@ class ResearchFilter(django_filters.FilterSet):
     
     class Meta:
         model = Research
+        fields = {}
 
 class ResearchViewSet(viewsets.ModelViewSet):
     throttle_scope = 'api'
