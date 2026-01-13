@@ -375,8 +375,8 @@ header {
 .bg-image {
   position: absolute;
   inset: 0;
-  width: auto;
-  height: auto;
+  max-width: fit-content;
+  max-height: fit-content;
   object-fit: cover;
   object-position: center;
   opacity: 0.1;
