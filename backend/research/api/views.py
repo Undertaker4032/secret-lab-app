@@ -19,12 +19,6 @@ class ResearchFilter(django_filters.FilterSet):
     
     class Meta:
         model = Research
-        fields = {
-            'status': ['exact'],
-            'lead_division': ['exact'],
-            'required_clearance': ['exact'],
-            'created_date': ['exact'],
-        }
 
 class ResearchViewSet(viewsets.ModelViewSet):
     throttle_scope = 'api'

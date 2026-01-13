@@ -20,12 +20,6 @@ class DocumentFilter(django_filters.FilterSet):
     
     class Meta:
         model = Documentation
-        fields = {
-            'type': ['exact'],
-            'author_division': ['exact'],
-            'required_clearance': ['exact'],
-            'created_date': ['exact'],
-        }
 
 class DocumentViewSet(viewsets.ModelViewSet):
     throttle_scope = 'api'

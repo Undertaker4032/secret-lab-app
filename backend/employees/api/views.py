@@ -18,7 +18,6 @@ from django.core.cache import cache
 logger = logging.getLogger('employees')
 
 class EmployeeFilter(django_filters.FilterSet):
-    # Используем NumberFilter и ссылаемся на id связанных объектов
     cluster = django_filters.NumberFilter(field_name='division__department__cluster__id')
     department = django_filters.NumberFilter(field_name='division__department__id')
     division = django_filters.NumberFilter(field_name='division__id')
@@ -26,13 +25,6 @@ class EmployeeFilter(django_filters.FilterSet):
 
     class Meta:
         model = Employee
-        fields = {
-            'is_active': ['exact'],
-            'cluster': ['exact'],       # Добавлено
-            'department': ['exact'],    # Добавлено
-            'division': ['exact'],      # Добавлено
-            'clearance_level': ['exact'],
-        }
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     throttle_scope = 'api'
