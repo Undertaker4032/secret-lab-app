@@ -28,34 +28,37 @@
   let touchStartX = 0;
   let touchEndX = 0;
   let touchStartY = 0;
+  let touchEndY = 0;
   let isSwiping = false;
-  let menuTranslateX = 0;
   const SWIPE_THRESHOLD = 50;
+  let menuTransform = $state('translateX(0)');
 
   function handleTouchStart(event: TouchEvent) {
     touchStartX = event.touches[0].clientX;
     touchStartY = event.touches[0].clientY;
-    isSwiping = true;
+    isSwiping = false;
   }
 
   function handleTouchMove(event: TouchEvent) {
-    if (!isSwiping) return;
+    if (!open) return;
     
     const touchX = event.touches[0].clientX;
     const touchY = event.touches[0].clientY;
     const deltaX = touchX - touchStartX;
     const deltaY = touchY - touchStartY;
     
-    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
-    
-    if (deltaX < 0) {
-      menuTranslateX = Math.max(deltaX, -300);
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      isSwiping = true;
+      event.preventDefault();
+      
+      if (deltaX < 0) {
+        menuTransform = `translateX(${Math.max(deltaX, -100)}px)`;
+      }
     }
   }
 
   function handleTouchEnd() {
-    if (!isSwiping) return;
-    isSwiping = false;
+    if (!isSwiping || !open) return;
     
     const swipeDistance = touchEndX - touchStartX;
     
@@ -63,11 +66,14 @@
       handleClose();
     }
     
-    menuTranslateX = 0;
+    menuTransform = 'translateX(0)';
+    isSwiping = false;
   }
 
-  // Добавьте этот стиль в конце компонента
-  const menuStyle = `transform: translateX(${menuTranslateX}px); transition: ${isSwiping ? 'none' : 'transform 0.3s ease'};`;
+  function handleTouchCancel() {
+    menuTransform = 'translateX(0)';
+    isSwiping = false;
+  }
 </script>
 
 {#if open}
@@ -84,12 +90,12 @@
 
   <!-- Боковое меню -->
   <aside
-    style={menuStyle}
+    style="transform: {menuTransform}; transition: {isSwiping ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'}"
     class="flex flex-col w-80 sm:w-96 z-50 fixed top-0 left-0 h-screen px-4 py-4 overflow-y-auto bg-rms-cod-gray border-r border-rms-mine-shaft shadow-xl"
     ontouchstart={handleTouchStart}
     ontouchmove={handleTouchMove}
     ontouchend={handleTouchEnd}
-    ontouchcancel={handleTouchEnd}
+    ontouchcancel={handleTouchCancel}
   >
     <!-- Верхняя часть с кнопкой закрытия и лого -->
     <div class="flex justify-between items-center mb-8">
