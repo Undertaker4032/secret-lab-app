@@ -96,7 +96,9 @@ else:
         "http://192.168.1.106:80",
     ]
 
-# JWT settings - ПОСЛЕ условия PRODUCTION
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+
 from datetime import timedelta
 
 SIMPLE_JWT = {
@@ -111,7 +113,6 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
     
-    # Настройки для куки
     'AUTH_COOKIE_ACCESS': 'access_token',
     'AUTH_COOKIE_REFRESH': 'refresh_token',
     'AUTH_COOKIE_HTTP_ONLY': True, # Защита от XSS
@@ -119,7 +120,6 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_MAX_AGE': 60 * 60 * 24 * 7, # 7 дней
 }
 
-# Переопределяем настройки кук для production
 if PRODUCTION:
     SIMPLE_JWT['AUTH_COOKIE_SECURE'] = True
     SIMPLE_JWT['AUTH_COOKIE_SAMESITE'] = 'None'
@@ -127,7 +127,6 @@ else:
     SIMPLE_JWT['AUTH_COOKIE_SECURE'] = False
     SIMPLE_JWT['AUTH_COOKIE_SAMESITE'] = 'Lax'
 
-# Дополняем CORS для Docker
 if os.getenv('DOCKERIZED', 'False').lower() == 'true':
     CORS_ALLOWED_ORIGINS.extend([
         "http://frontend:3000",

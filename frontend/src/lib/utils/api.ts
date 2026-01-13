@@ -10,7 +10,6 @@ import {
 } from '$lib/stores/auth';
 import type { Employee, LoginResponse, User } from '$lib/stores/auth'; 
 
-// ===== TYPES =====
 import type { 
   EmployeesFilters, 
   EmployeesResponse,
@@ -42,10 +41,9 @@ export interface EmployeeFiltersData {
   clearance_levels: ClearanceLevel[];
 }
 
-// ===== CONSTANTS =====
 const API_BASE = '';
+let refreshPromise: Promise<string | null> | null = null;
 
-// ===== UTILITY FUNCTIONS =====
 function getCSRFToken(): string | null {
   if (typeof document === 'undefined') return null;
   
@@ -60,13 +58,38 @@ function getCSRFToken(): string | null {
   return null;
 }
 
-// ===== REQUEST MANAGEMENT =====
-let isRefreshing = false;
-const refreshSubscribers: ((token: string) => void)[] = [];
+async function refreshToken(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+  
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch('/api/auth/refresh/', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-function onRefreshed(token: string) {
-  refreshSubscribers.forEach(callback => callback(token));
-  refreshSubscribers.length = 0;
+      if (response.ok) {
+        const data = await response.json();
+        const newToken = data.access;
+        accessToken.set(newToken);
+        return newToken;
+      } else {
+        clearAuth();
+        return null;
+      }
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      clearAuth();
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 async function makeRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
@@ -79,18 +102,13 @@ async function makeRequest<T>(url: string, options: RequestInit = {}): Promise<T
 
   if (currentToken) {
     headers['Authorization'] = `Bearer ${currentToken}`;
-  } else {
-    console.warn('No access token available for request');
   }
 
-  // Для POST, PUT, PATCH, DELETE добавление CSRF токена
   const method = options.method?.toUpperCase();
   if (method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
     const csrfToken = getCSRFToken();
     if (csrfToken) {
       headers['X-CSRFToken'] = csrfToken;
-    } else {
-      console.warn('No CSRF token available for request');
     }
   }
 
@@ -100,55 +118,39 @@ async function makeRequest<T>(url: string, options: RequestInit = {}): Promise<T
     ...options
   };
 
-  console.log(`=== API REQUEST ===`);
-  console.log(`URL: ${API_BASE}${url}`);
-  console.log(`Method: ${options.method || 'GET'}`);
-  console.log(`Headers:`, headers);
-  console.log(`Credentials: include`);
-
   try {
     const response = await fetch(`${API_BASE}${url}`, config);
     
-    console.log(`=== API RESPONSE ===`);
-    console.log(`Status: ${response.status} ${response.statusText}`);
-    console.log(`URL: ${response.url}`);
-    console.log(`OK: ${response.ok}`);
-    
-    if (response.status === 401 && currentToken && !url.includes('/auth/refresh/')) {
-      console.log('Received 401, attempting token refresh...');
+    if (response.status === 401 && currentToken && !url.includes('/auth/refresh/') && !url.includes('/auth/login/')) {
+      const newToken = await refreshToken();
+      
+      if (newToken) {
+        headers['Authorization'] = `Bearer ${newToken}`;
+        const retryConfig = { ...config, headers };
+        const retryResponse = await fetch(`${API_BASE}${url}`, retryConfig);
+        
+        if (!retryResponse.ok) {
+          const errorData = await retryResponse.json().catch(() => ({}));
+          throw new Error(errorData.detail || `HTTP error! status: ${retryResponse.status}`);
+        }
+        
+        return await retryResponse.json() as T;
+      }
     }
     
     if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = { detail: `HTTP error! status: ${response.status}` };
-      }
-      
-      console.log(`=== API ERROR ===`);
-      console.log(`Error data:`, errorData);
-      
-      const errorMessage = errorData.detail || errorData.message || `HTTP error! status: ${response.status}`;
-      const error = new Error(errorMessage);
-      (error as any).status = response.status;
-      (error as any).data = errorData;
-      throw error;
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
     }
     
-    const responseData = await response.json();
-    console.log(`=== API SUCCESS ===`);
-    console.log(`Response data:`, responseData);
-    return responseData as T;
+    return await response.json() as T;
     
   } catch (error) {
-    console.error(`=== API REQUEST FAILED ===`);
-    console.error(`Error:`, error);
+    console.error(`API request failed: ${url}`, error);
     throw error;
   }
 }
 
-// ===== CORE API METHODS =====
 function getApi<T>(url: string): Promise<T> {
   return makeRequest<T>(url);
 }
@@ -180,7 +182,6 @@ function deleteApi<T>(url: string): Promise<T> {
   });
 }
 
-// ===== URL BUILDER =====
 function buildUrlWithParams(baseUrl: string, filters: Record<string, any> = {}): string {
   const params = new URLSearchParams();
   
@@ -194,9 +195,7 @@ function buildUrlWithParams(baseUrl: string, filters: Record<string, any> = {}):
   return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 }
 
-// ===== API ENDPOINTS =====
 export const api = {
-  // ===== AUTHENTICATION =====
   async login(username: string, password: string): Promise<LoginResponse> {
     const csrfToken = getCSRFToken();
     const headers: Record<string, string> = {
@@ -216,15 +215,14 @@ export const api = {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.detail || errorData.message || 'Ошибка входа';
-      throw new Error(errorMessage);
+      throw new Error(errorData.detail || 'Ошибка входа');
     }
 
     const data = await response.json();
     
     accessToken.set(data.access);
-    
     user.set(data.user);
+    
     if (data.employee) {
       employee.set(data.employee);
     } else {
@@ -269,8 +267,6 @@ export const api = {
       employee.set(employeeData);
       return employeeData;
     } catch (error) {
-      console.error('Failed to get employee data:', error);
-      
       if (get(user)) {
         const fallbackEmployee: Employee = {
           id: 0,
@@ -292,7 +288,6 @@ export const api = {
     }
   },
 
-  // ===== EMPLOYEES =====
   async getEmployees(filters: EmployeesFilters = {}): Promise<EmployeesResponse> {
     const url = buildUrlWithParams('/api/employees/', filters);
     return await getApi<EmployeesResponse>(url);
@@ -306,7 +301,6 @@ export const api = {
     return await getApi<EmployeeFiltersData>('/api/employees/employee-filters/');
   },
 
-  // ===== DOCUMENTATION =====
   async getDocumentation(filters: DocumentationFilters = {}): Promise<DocumentationResponse> {
     const url = buildUrlWithParams('/api/documentation/', filters);
     return await getApi<DocumentationResponse>(url);
@@ -320,7 +314,6 @@ export const api = {
     return await getApi<DocumentTypesResponse>('/api/documentation/document-types/');
   },
 
-  // ===== RESEARCH =====
   async getResearch(filters: ResearchFilters = {}): Promise<ResearchResponse> {
     const url = buildUrlWithParams('/api/research/', filters);
     return await getApi<ResearchResponse>(url);
@@ -334,7 +327,6 @@ export const api = {
     return await getApi<ResearchStatusesResponse>('/api/research/research-statuses/');
   },
 
-  // ===== FILTER DATA =====
   async getClearanceLevels(): Promise<ClearanceLevelsResponse> {
     return await getApi<ClearanceLevelsResponse>('/api/employees/clearance-level/');
   },
@@ -355,7 +347,6 @@ export const api = {
     return await getApi<Position[]>('/api/employees/positions/');
   },
 
-  // ===== GENERIC METHODS =====
   get: getApi,
   post: postApi,
   put: putApi,
@@ -363,117 +354,66 @@ export const api = {
   delete: deleteApi
 };
 
-// ===== AUTH INITIALIZATION =====
 export async function initializeAuth(): Promise<void> {
-    try {
-        console.log('Initializing auth...');
+  try {
+    authLoading.set(true);
+    
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        await fetch('/api/auth/csrf/', {
+          credentials: 'include',
+          method: 'GET'
+        });
+        break;
+      } catch (error) {
+        retries--;
+        if (retries === 0) throw error;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    
+    const storedToken = localStorage.getItem('accessToken');
+    
+    if (storedToken) {
+      accessToken.set(storedToken);
+      
+      try {
+        const profile = await api.getUserProfile();
         
-        // Retry логика для CSRF токена
-        let retries = 3;
-        while (retries > 0) {
-            try {
-                await fetch('/api/auth/csrf/', {
-                    credentials: 'include',
-                    method: 'GET'
-                });
-                break; // Успех, выходим из цикла
-            } catch (error) {
-                retries--;
-                if (retries === 0) throw error;
-                console.warn(`CSRF fetch failed, ${retries} retries left`);
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Ждем 1 секунду
+        if (profile) {
+          isAuthenticated.set(true);
+          await api.getEmployeeData();
+        } else {
+          clearAuth();
+        }
+      } catch (error) {
+        console.error('Failed to load profile with stored token:', error);
+        
+        try {
+          const newToken = await refreshToken();
+          if (newToken) {
+            const profile = await api.getUserProfile();
+            if (profile) {
+              isAuthenticated.set(true);
+              await api.getEmployeeData();
+            } else {
+              clearAuth();
             }
+          } else {
+            clearAuth();
+          }
+        } catch (refreshError) {
+          clearAuth();
         }
-        
-        // Остальная логика без изменений...
-        const storedToken = localStorage.getItem('accessToken');
-        // ...
-        
-    } catch (error) {
-        console.error('Auth initialization error:', error);
-        isAuthenticated.set(false);
-        accessToken.set(null);
-        user.set(null);
-        employee.set(null);
+      }
+    } else {
+      isAuthenticated.set(false);
     }
-}
-
-async function loadUserProfile(): Promise<void> {
-    try {
-        console.log('Loading user profile...');
-        const response = await fetch('/api/auth/profile/', {
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(get(accessToken) ? { 'Authorization': `Bearer ${get(accessToken)}` } : {})
-            },
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Profile data received:', data);
-            user.set(data.user || data);
-            
-            await loadEmployeeData();
-        } else {
-            console.warn('Profile request failed with status:', response.status);
-            throw new Error('Failed to load profile');
-        }
-    } catch (error) {
-        console.error('Failed to load user profile:', error);
-        throw error;
-    }
-}
-
-async function loadEmployeeData(): Promise<void> {
-    try {
-        const employeeData = await getApi<Employee>('/api/employees/my_profile/');
-        employee.set(employeeData);
-        console.log('Employee data loaded:', employeeData);
-    } catch (error) {
-        console.error('Failed to get employee data:', error);
-        
-        if (get(user)) {
-            const fallbackEmployee: Employee = {
-                id: 0,
-                name: 'Сотрудник',
-                is_active: true,
-                clearance_level: null,
-                cluster: null,
-                department: null,
-                division: null,
-                position: null,
-                profile_picture: null
-            };
-            employee.set(fallbackEmployee);
-        } else {
-            employee.set(null);
-        }
-    }
-}
-
-async function refreshAccessToken(): Promise<string | null> {
-    try {
-        console.log('Refreshing access token...');
-        const response = await fetch('/api/auth/refresh/', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            const newToken = data.access;
-            console.log('New access token received');
-            return newToken;
-        } else {
-            console.warn('Token refresh failed with status:', response.status);
-            return null;
-        }
-    } catch (error) {
-        console.error('Token refresh error:', error);
-        return null;
-    }
+  } catch (error) {
+    console.error('Auth initialization error:', error);
+    clearAuth();
+  } finally {
+    authLoading.set(false);
+  }
 }
