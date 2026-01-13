@@ -19,14 +19,14 @@
   let loading = true;
 
   onMount(async () => {
-  try {
-    await loadFilterData();
-  } catch (error) {
-    console.error('Error loading research filter data:', error);
-  } finally {
-    loading = false;
-  }
-});
+    try {
+      await loadFilterData();
+    } catch (error) {
+      console.error('Error loading filter data:', error);
+    } finally {
+      loading = false;
+    }
+  });
 
   async function loadFilterData() {
     try {
@@ -44,17 +44,17 @@
   }
 
   function handleSubmit() {
-  const filters = cleanFilters({
-    search: searchTerm,
-    type: selectedType,
-    author_division: selectedDivision,
-    required_clearance: selectedClearance,
-    created_date: selectedDate,
-    ordering: selectedSort
-  });
-  
-  dispatch('filterChange', filters);
-}
+    const filters = cleanFilters({
+      search: searchTerm,
+      type: selectedType,
+      author_division: selectedDivision,
+      required_clearance: selectedClearance,
+      created_date: selectedDate,
+      ordering: selectedSort
+    });
+    
+    dispatch('filterChange', filters);
+  }
 
   function handleClear() {
     searchTerm = '';
@@ -118,7 +118,7 @@
           >
             <option value="">Все типы</option>
             {#each documentTypes as type}
-              <option value={type.name}>{type.name}</option>
+              <option value={type.id}>{type.name}</option>
             {/each}
           </select>
         </div>
@@ -127,12 +127,15 @@
           <label for="division" class="block text-sm font-medium text-rms-white mb-2">
             Отдел автора
           </label>
-          <select>
+          <select
             id="division"
-            type="text"
             bind:value={selectedDivision}
-            placeholder="Название отдела..."
-            class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white placeholder-rms-dove-gray focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
+            class="w-full px-3 py-2.5 border border-rms-mine-shaft rounded-lg bg-rms-black text-rms-white focus:outline-none focus:ring-2 focus:ring-rms-white/50 focus:border-rms-white/30 transition-all duration-300"
+          >
+            <option value="">Все отделы</option>
+            {#each divisions as division}
+              <option value={division.id}>{division.name}</option>
+            {/each}
           </select>
         </div>
 
@@ -147,7 +150,7 @@
           >
             <option value="">Все уровни</option>
             {#each clearanceLevels as level}
-              <option value={level.number}>{level.name}</option>
+              <option value={level.id}>{level.name}</option>
             {/each}
           </select>
         </div>

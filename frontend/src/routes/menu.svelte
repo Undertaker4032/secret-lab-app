@@ -24,6 +24,50 @@
     await api.logout();
     onClose?.();
   }
+
+  let touchStartX = 0;
+  let touchEndX = 0;
+  let touchStartY = 0;
+  let isSwiping = false;
+  let menuTranslateX = 0;
+  const SWIPE_THRESHOLD = 50;
+
+  function handleTouchStart(event: TouchEvent) {
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+    isSwiping = true;
+  }
+
+  function handleTouchMove(event: TouchEvent) {
+    if (!isSwiping) return;
+    
+    const touchX = event.touches[0].clientX;
+    const touchY = event.touches[0].clientY;
+    const deltaX = touchX - touchStartX;
+    const deltaY = touchY - touchStartY;
+    
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+    
+    if (deltaX < 0) {
+      menuTranslateX = Math.max(deltaX, -300);
+    }
+  }
+
+  function handleTouchEnd() {
+    if (!isSwiping) return;
+    isSwiping = false;
+    
+    const swipeDistance = touchEndX - touchStartX;
+    
+    if (swipeDistance < -SWIPE_THRESHOLD) {
+      handleClose();
+    }
+    
+    menuTranslateX = 0;
+  }
+
+  // Добавьте этот стиль в конце компонента
+  const menuStyle = `transform: translateX(${menuTranslateX}px); transition: ${isSwiping ? 'none' : 'transform 0.3s ease'};`;
 </script>
 
 {#if open}
@@ -40,9 +84,12 @@
 
   <!-- Боковое меню -->
   <aside
-    in:fly={{ duration: 300, easing: cubicOut, x: -300 }}
-    out:fly={{ duration: 200, easing: cubicOut, x: -300 }}
+    style={menuStyle}
     class="flex flex-col w-80 sm:w-96 z-50 fixed top-0 left-0 h-screen px-4 py-4 overflow-y-auto bg-rms-cod-gray border-r border-rms-mine-shaft shadow-xl"
+    ontouchstart={handleTouchStart}
+    ontouchmove={handleTouchMove}
+    ontouchend={handleTouchEnd}
+    ontouchcancel={handleTouchEnd}
   >
     <!-- Верхняя часть с кнопкой закрытия и лого -->
     <div class="flex justify-between items-center mb-8">

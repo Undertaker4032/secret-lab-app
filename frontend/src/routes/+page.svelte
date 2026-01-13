@@ -18,9 +18,9 @@
 	<title>RMS Laboratories</title>
 </svelte:head>
 
-<main class="text-rms-white px-[5%] md:px-[25%] pt-6 text-2xl">
+<main class="text-rms-white px-4 sm:px-[5%] md:px-[25%] pt-6 text-base sm:text-lg md:text-2xl">
     <section class="py-3">
-        <h1 class="text-4xl font-bold my-3">О нас</h1>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold my-3">О нас</h1>
         <img src={lab00} alt="Изображение" class="py-3 rounded-4xl">
         <strong>RMS Laboratories</strong> — это глобальная сеть
         научно-исследовательских комплексов, определяющих
@@ -55,9 +55,9 @@
         <h1 class="text-4xl font-bold my-3">Руководство</h1>
         <img src={admin01} alt="Административный корпус" class="py-3 px-10 w-full h-auto md:max-w-3/4 flex place-self-center">
         
-        <div class="relative">
+        <div class="bg-image-container">
             <img src={back04} alt="Фон" class="absolute inset-0 w-full h-auto object-cover opacity-10 z-0 md:w-auto md:h-full">
-            <div class="relative z-10">
+            <div class="bg-image-content">
                 <p class="font-bold text-xl mb-4">Высшее руководство RMS-12:</p>
                 <ul class="list-disc list-inside space-y-2 text-lg">
                     <li><strong>Генеральный Директор RMS-12</strong> - верховное руководство комплексом</li>
@@ -81,9 +81,9 @@
         <h2 class="text-3xl font-bold my-3">Научный Кластер</h2>
         <img src={lab02} alt="Научная лаборатория" class="py-3 px-10 w-full h-auto md:max-w-3/4 flex place-self-center">
         
-        <div class="relative">
+        <div class="bg-image-container">
             <img src={back01} alt="Фон" class="absolute inset-0 w-full h-auto object-cover opacity-10 z-0 md:w-auto md:h-full">
-            <div class="relative z-10">
+            <div class="bg-image-content">
                 <p class="mb-4">
                     Сердце и ум RMS. Учёные, теоретики и инженеры
                     из различных департаментов работают на передних
@@ -136,9 +136,9 @@
         <h2 class="text-3xl font-bold my-3">Кластер Безопасности</h2>
         <img src={sec01} alt="Системы безопасности" class="py-3 px-10 w-full h-auto md:max-w-3/4 flex place-self-center">
 
-        <div class="relative">
+        <div class="bg-image-container">
             <img src={back02} alt="Фон" class="absolute inset-0 w-full h-auto object-cover opacity-10 z-0 md:w-auto md:h-full">
-            <div class="relative z-10">
+            <div class="bg-image-content">
                 <p class="mb-4">
                     Щит RMS. Элита, обеспечивающая
                     неприкосновенность наших исследований и
@@ -173,9 +173,9 @@
         <h2 class="text-3xl font-bold my-3">Операционный Кластер</h2>
         <img src={it01} alt="Инфраструктура" class="py-3 px-10 w-full h-auto md:max-w-3/4 flex place-self-center">
 
-        <div class="relative">
+        <div class="bg-image-container">
             <img src={back03} alt="Фон" class="absolute inset-0 w-full h-auto object-cover opacity-10 z-0 md:w-auto md:h-full">
-            <div class="relative z-10">
+            <div class="bg-image-content">
                 <p class="mb-4">
                     Кровь и нервная система RMS. Специалисты,
                     которые превращают теории в работающую

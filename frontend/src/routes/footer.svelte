@@ -3,8 +3,8 @@
 </script>
 
 <footer class="bg-rms-black border-t border-rms-mine-shaft text-rms-white">
-    <div class="w-full max-w-7xl mx-auto px-4 py-8">
-        <div class="sm:flex sm:items-center sm:justify-between">
+    <div class="w-full max-w-7xl mx-auto px-4 py-6 sm:py-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <a href="/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse group">
                 <img src={logo} class="h-8 group-hover:opacity-80 transition-opacity" alt="RMS Laboratories" />
             </a>

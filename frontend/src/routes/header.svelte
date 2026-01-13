@@ -35,7 +35,7 @@
 </script>
 
 <header class="bg-rms-black border-b border-rms-mine-shaft shadow-lg">
-  <div class="w-full mx-auto px-4 py-3 flex items-center justify-between">
+  <div class="w-full mx-auto px-3 sm:px-4 py-3 flex items-center justify-between">
     <!-- Левая часть: кнопка меню -->
     <button 
       class="cursor-pointer hover:bg-rms-mine-shaft rounded-2xl p-3 transition-all duration-200"
