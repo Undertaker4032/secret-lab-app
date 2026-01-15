@@ -70,7 +70,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                                             extra={'user': username})
                         employee_data = None
                     
-                    # refresh token в куки
                     refresh_token = response.data['refresh']
                     response.set_cookie(
                         key=settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'],
@@ -82,7 +81,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                         path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
                     )
                     
-                    # Возвращение access token
                     response.data = {
                         'access': response.data['access'],
                         'user': {

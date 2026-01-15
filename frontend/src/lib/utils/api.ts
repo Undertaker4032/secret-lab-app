@@ -63,12 +63,19 @@ async function refreshToken(): Promise<string | null> {
   
   refreshPromise = (async () => {
     try {
+      const csrfToken = getCSRFToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (csrfToken) {
+        headers['X-CSRFToken'] = csrfToken;
+      }
+
       const response = await fetch('/api/auth/refresh/', {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (response.ok) {
@@ -81,7 +88,6 @@ async function refreshToken(): Promise<string | null> {
         return null;
       }
     } catch (error) {
-      console.error('Token refresh error:', error);
       clearAuth();
       return null;
     } finally {

@@ -16,7 +16,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-# Production detection - ДОЛЖНО БЫТЬ В НАЧАЛЕ
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 if PRODUCTION:
@@ -421,7 +420,7 @@ LOGGING = {
             'level': 'WARNING',
             'propagate': False,
         },
-        
+
         'api': {
             'handlers': ['console', 'file_app'],
             'level': 'DEBUG' if DEBUG else 'INFO',
