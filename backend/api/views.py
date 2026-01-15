@@ -131,7 +131,6 @@ class CookieTokenRefreshView(APIView):
     throttle_scope = 'auth'
     throttle_classes = [ScopedRateThrottle]
     
-    # Используем логгер для api.auth
     logger = logging.getLogger('api.auth')
 
     def post(self, request):
@@ -141,7 +140,7 @@ class CookieTokenRefreshView(APIView):
             refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'])
             
             if not refresh_token:
-                self.logger.warning("Refresh token не найден в куки", extra={
+                self.logger.warning("Refresh token not found in cookies", extra={
                     'action': 'token_refresh_error',
                     'client_ip': client_ip,
                     'error_type': 'missing_token'
@@ -151,35 +150,16 @@ class CookieTokenRefreshView(APIView):
                     status=status.HTTP_401_UNAUTHORIZED
                 )
             
-            self.logger.info("Начало обработки refresh токена", extra={
-                'action': 'token_refresh_start',
-                'client_ip': client_ip,
-                'token_length': len(refresh_token),
-                'token_prefix': refresh_token[:20] + '...' if len(refresh_token) > 20 else refresh_token
-            })
-            
             try:
                 refresh = RefreshToken(refresh_token)
                 user_id = refresh['user_id']
                 token_jti = refresh['jti']
-                token_exp = refresh['exp']
-                
-                self.logger.info("Токен успешно декодирован", extra={
-                    'action': 'token_decoded',
-                    'client_ip': client_ip,
-                    'user_id': user_id,
-                    'token_jti': token_jti,
-                    'token_exp': token_exp
-                })
-                
             except Exception as e:
-                error_type = type(e).__name__
-                self.logger.error(f"Ошибка валидации токена - {error_type}: {str(e)}", extra={
+                self.logger.warning("Invalid refresh token", extra={
                     'action': 'token_validation_error',
                     'client_ip': client_ip,
-                    'error_type': error_type,
-                    'error_msg': str(e)[:100]
-                }, exc_info=True)
+                    'error_type': type(e).__name__
+                })
                 return Response(
                     {'error': 'Invalid refresh token'}, 
                     status=status.HTTP_401_UNAUTHORIZED
@@ -187,53 +167,31 @@ class CookieTokenRefreshView(APIView):
             
             try:
                 user = User.objects.get(id=user_id)
-                self.logger.debug(f"Пользователь найден: {user.username}", extra={
-                    'action': 'user_found',
-                    'client_ip': client_ip,
-                    'user_id': user_id
-                })
             except User.DoesNotExist:
-                self.logger.error(f"Пользователь с ID {user_id} не найден", extra={
+                self.logger.error(f"User not found for refresh token", extra={
                     'action': 'user_not_found',
                     'client_ip': client_ip,
                     'user_id': user_id
                 })
                 return Response(
-                    {'error': 'User not found'}, 
+                    {'error': 'Invalid refresh token'}, 
                     status=status.HTTP_401_UNAUTHORIZED
                 )
             
             if settings.SIMPLE_JWT.get('ROTATE_REFRESH_TOKENS', False):
-                self.logger.info("Ротация токенов включена", extra={
-                    'action': 'token_rotation_start',
-                    'client_ip': client_ip,
-                    'user_id': user_id
-                })
-                
                 if settings.SIMPLE_JWT.get('BLACKLIST_AFTER_ROTATION', False):
                     try:
                         refresh.blacklist()
-                        self.logger.info(f"Токен {token_jti} добавлен в черный список", extra={
-                            'action': 'token_blacklisted',
-                            'client_ip': client_ip,
-                            'old_token_jti': token_jti
-                        })
-                    except Exception as e:
-                        self.logger.warning(f"Не удалось добавить токен в blacklist: {e}", extra={
-                            'action': 'blacklist_failed',
-                            'client_ip': client_ip,
-                            'error_msg': str(e)
-                        })
+                    except Exception:
+                        pass
                 
                 new_refresh = RefreshToken.for_user(user)
                 new_access = str(new_refresh.access_token)
-                new_token_jti = new_refresh['jti']
                 
-                self.logger.info("Новая пара токенов создана", extra={
-                    'action': 'new_tokens_created',
+                self.logger.info("Refresh tokens rotated successfully", extra={
+                    'action': 'token_rotation',
                     'client_ip': client_ip,
-                    'user_id': user_id,
-                    'new_token_jti': new_token_jti
+                    'user_id': user_id
                 })
                 
                 response = Response({'access': new_access})
@@ -247,30 +205,15 @@ class CookieTokenRefreshView(APIView):
                     path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
                 )
                 
-                self.logger.info("Refresh токен обновлен в куки", extra={
-                    'action': 'cookie_updated',
-                    'client_ip': client_ip,
-                    'user_id': user_id
-                })
-                
                 return response
             
             access_token = str(refresh.access_token)
-            self.logger.info("Возвращен новый access токен (без ротации)", extra={
-                'action': 'access_token_generated',
-                'client_ip': client_ip,
-                'user_id': user_id
-            })
-            
             return Response({'access': access_token})
             
         except Exception as e:
-            error_type = type(e).__name__
-            self.logger.error(f"Необработанная ошибка в представлении: {error_type}: {str(e)}", extra={
-                'action': 'unhandled_error',
-                'client_ip': client_ip,
-                'error_type': error_type,
-                'error_msg': str(e)[:200]
+            self.logger.error(f"Internal server error during token refresh: {type(e).__name__}", extra={
+                'action': 'internal_server_error',
+                'client_ip': client_ip
             }, exc_info=True)
             return Response(
                 {'error': 'Internal server error'}, 
