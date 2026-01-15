@@ -190,8 +190,54 @@
       <!-- Контент исследования -->
       {#if accessGranted && researchData}
         <div class="flex flex-col lg:flex-row gap-8">
+          <!-- Боковая панель с оглавлением -->
+          {#if tableOfContents.length > 0}
+            <div class="lg:w-1/4 order-1 lg:order-2">
+              <div class="sticky top-8">
+                <div class="bg-rms-cod-gray rounded-lg border border-rms-mine-shaft p-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-rms-white flex items-center">
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                      </svg>
+                      Содержание
+                    </h3>
+                    <button
+                      on:click={() => showToc = !showToc}
+                      class="text-rms-nobel hover:text-rms-white transition-colors"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {#if showToc}
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        {:else}
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        {/if}
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {#if showToc}
+                    <nav class="space-y-1">
+                      {#each tableOfContents as item}
+                        <a
+                          href="#{item.id}"
+                          class="toc-item level-{item.level} {activeHeadingId === item.id ? 'active' : ''}"
+                          on:click|preventDefault={() => scrollToHeading(item.id)}
+                        >
+                          {item.text}
+                        </a>
+                      {/each}
+                    </nav>
+                  {:else}
+                    <p class="text-rms-nobel text-sm italic">Нажмите для отображения</p>
+                  {/if}
+                </div>
+              </div>
+            </div>
+          {/if}
+
           <!-- Основной контент -->
-          <div class="lg:w-3/4">
+          <div class="{tableOfContents.length > 0 ? 'lg:w-3/4 order-2 lg:order-1' : 'w-full'}">
             <div class="bg-rms-cod-gray rounded-lg border border-rms-mine-shaft overflow-hidden">
               <!-- Заголовок исследования -->
               <div class="p-8 border-b border-rms-mine-shaft">
@@ -297,52 +343,6 @@
               </a>
             </div>
           </div>
-
-          <!-- Боковая панель с оглавлением -->
-          {#if tableOfContents.length > 0}
-            <div class="lg:w-1/4">
-              <div class="sticky top-8">
-                <div class="bg-rms-cod-gray rounded-lg border border-rms-mine-shaft p-6">
-                  <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-bold text-rms-white flex items-center">
-                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                      </svg>
-                      Содержание
-                    </h3>
-                    <button
-                      on:click={() => showToc = !showToc}
-                      class="text-rms-nobel hover:text-rms-white transition-colors"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {#if showToc}
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        {:else}
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        {/if}
-                      </svg>
-                    </button>
-                  </div>
-                  
-                  {#if showToc}
-                    <nav class="space-y-1">
-                      {#each tableOfContents as item}
-                        <a
-                          href="#{item.id}"
-                          class="toc-item level-{item.level} {activeHeadingId === item.id ? 'active' : ''}"
-                          on:click|preventDefault={() => scrollToHeading(item.id)}
-                        >
-                          {item.text}
-                        </a>
-                      {/each}
-                    </nav>
-                  {:else}
-                    <p class="text-rms-nobel text-sm italic">Нажмите для отображения</p>
-                  {/if}
-                </div>
-              </div>
-            </div>
-          {/if}
         </div>
       {:else if accessGranted && !researchData && !isLoading}
         <!-- Загрузка данных -->
