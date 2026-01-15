@@ -31,8 +31,8 @@
       {/if}
 
       <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-3 mb-2">
-          <h3 class="text-lg font-semibold text-rms-white group-hover:text-rms-white/90 truncate">
+        <div class="flex flex-wrap items-start gap-3 mb-2">
+          <h3 class="text-lg font-semibold text-rms-white group-hover:text-rms-white/90 break-words min-w-0 flex-1">
             {employee.name}
           </h3>
           {#if !employee.is_active}

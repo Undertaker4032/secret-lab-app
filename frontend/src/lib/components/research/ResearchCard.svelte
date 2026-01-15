@@ -28,15 +28,15 @@
 >
   <div class="flex items-start justify-between">
     <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-3 mb-3">
-        <h3 class="text-lg font-semibold text-rms-white group-hover:text-rms-white/90 truncate">
+      <div class="flex flex-wrap items-start gap-3 mb-3">
+        <h3 class="text-lg font-semibold text-rms-white group-hover:text-rms-white/90 break-words min-w-0 flex-1">
           {researchItem.title}
         </h3>
         <div class="flex items-center gap-2 flex-shrink-0">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900/40 text-red-200 border border-red-600/50">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900/40 text-red-200 border border-red-600/50 whitespace-nowrap">
             {researchItem.required_clearance_name}
           </span>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {getStatusColor(researchItem.status_name)}">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {getStatusColor(researchItem.status_name)} whitespace-nowrap">
             {researchItem.status_name}
           </span>
         </div>
