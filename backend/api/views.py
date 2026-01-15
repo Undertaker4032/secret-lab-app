@@ -148,34 +148,31 @@ class CookieTokenRefreshView(APIView):
             
             refresh = RefreshToken(refresh_token)
             
-            access_token = str(refresh.access_token)
-            
-            # Если включена ротация токенов, генерация refresh token
             if settings.SIMPLE_JWT.get('ROTATE_REFRESH_TOKENS', False):
-                refresh.set_jti()
-                refresh.set_exp()
-                new_refresh_token = str(refresh)
+                if settings.SIMPLE_JWT.get('BLACKLIST_AFTER_ROTATION', False):
+                    try:
+                        refresh.blacklist()
+                    except Exception as e:
+                        auth_logger.warning(f"Не удалось добавить токен в blacklist: {e}")
                 
-                # обновление refresh token в куки
-                response = Response({
-                    'access': access_token
-                })
+                new_refresh = RefreshToken.for_user(refresh.user)
+                new_access = str(new_refresh.access_token)
                 
+                response = Response({'access': new_access})
                 response.set_cookie(
                     key=settings.SIMPLE_JWT['AUTH_COOKIE_REFRESH'],
-                    value=new_refresh_token,
+                    value=str(new_refresh),
                     max_age=settings.SIMPLE_JWT['AUTH_COOKIE_MAX_AGE'],
                     secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                     httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                     samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
                     path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
                 )
-                
                 return response
             
-            return Response({
-                'access': access_token
-            })
+            access_token = str(refresh.access_token)
+            return Response({'access': access_token})
+
             
         except Exception as e:
             auth_logger.error(f"Ошибка при обновлении токена - {str(e)}",

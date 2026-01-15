@@ -22,7 +22,6 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 if PRODUCTION:
     DEBUG = False
     
-    # Domain settings
     DOMAIN_NAME = 'rms-labs.ru'
     
     ALLOWED_HOSTS = [
@@ -34,7 +33,6 @@ if PRODUCTION:
         'nginx',
     ]
     
-    # Security settings
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -48,7 +46,6 @@ if PRODUCTION:
     USE_X_FORWARDED_HOST = True
     USE_X_FORWARDED_PORT = True
     
-    # CORS settings for production
     CORS_ALLOWED_ORIGINS = [
         f"https://{DOMAIN_NAME}",
         f"https://www.{DOMAIN_NAME}",
@@ -60,7 +57,6 @@ if PRODUCTION:
     ]
     
 else:
-    # Development settings
     DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
     
     ALLOWED_HOSTS = [
@@ -115,9 +111,9 @@ SIMPLE_JWT = {
     
     'AUTH_COOKIE_ACCESS': 'access_token',
     'AUTH_COOKIE_REFRESH': 'refresh_token',
-    'AUTH_COOKIE_HTTP_ONLY': True, # Защита от XSS
-    'AUTH_COOKIE_PATH': '/', # Путь куки
-    'AUTH_COOKIE_MAX_AGE': 60 * 60 * 24 * 7, # 7 дней
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_PATH': '/',
+    'AUTH_COOKIE_MAX_AGE': 60 * 60 * 24 * 7,
 }
 
 if PRODUCTION:
@@ -163,9 +159,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt', # Simple JWT
+    'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'django_filters', # Фильтр
+    'django_filters',
     'corsheaders',
     'drf_spectacular',
     'api',
@@ -193,7 +189,7 @@ ROOT_URLCONF = 'secret_lab.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Папка для глобальных шаблонов
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -273,16 +269,16 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication', # JWT аутентификация
-        'rest_framework.authentication.SessionAuthentication', # Сессионная аутентификация для браузера
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     # 'DEFAULT_PERMISSION_CLASSES': (
     #     'rest_framework.permissions.IsAuthenticatedOrReadOnly', # Разрешения по умолчанию
     # ),
     'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend', # Фильтрация
-        'rest_framework.filters.SearchFilter', # Поиск
-        'rest_framework.filters.OrderingFilter', # Сортировка
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -425,7 +421,7 @@ LOGGING = {
             'level': 'WARNING',
             'propagate': False,
         },
-        # Кастомные логгеры
+        
         'api': {
             'handlers': ['console', 'file_app'],
             'level': 'DEBUG' if DEBUG else 'INFO',
