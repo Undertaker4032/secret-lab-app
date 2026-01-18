@@ -2,7 +2,6 @@ import logging
 import json
 from typing import Dict, Any
 from django.utils.timezone import now
-from django.contrib.auth.models import AnonymousUser
 
 class AuditLogFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
