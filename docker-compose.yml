@@ -38,6 +38,7 @@ services:
     volumes:
       - backend_static:/app/staticfiles
       - backend_media:/app/media
+      - ./logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,6 +53,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+        tag: "{{.Name}}/{{.ID}}"
+    user: "1000:1000"
 
   frontend:
     image: ghcr.io/undertaker4032/secret-lab-app-frontend:latest
@@ -92,11 +100,15 @@ services:
       - /home/deploy/RMS-site/nginx/ssl:/etc/nginx/ssl:ro
     networks:
       - app-network
+      - default
+      - monitoring
     restart: unless-stopped
 
 networks:
   app-network:
     driver: bridge
+  monitoring:
+    external: true
 
 volumes:
   postgres_data:

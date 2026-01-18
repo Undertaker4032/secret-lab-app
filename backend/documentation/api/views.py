@@ -48,7 +48,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
             'author',
             'type',
             'required_clearance'
-        ).order_by('id')
+        ).order_by('required_clearance')
     
     def get_serializer_class(self):
         if self.action == 'list':

@@ -49,7 +49,7 @@ class ResearchViewSet(viewsets.ModelViewSet):
             'lead',
             'status',
             'required_clearance'
-        ).prefetch_related('team').order_by('id')
+        ).prefetch_related('team').order_by('required_clearance')
     
     def get_serializer_class(self):
         if self.action == 'list':

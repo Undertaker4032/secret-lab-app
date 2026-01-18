@@ -37,7 +37,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             'clearance_level', 
             'division__department__cluster',
             'position' 
-        ).order_by('id')
+        ).order_by('name')
     
     serializer_class = EmployeeSerializer
     permission_classes = [ReadOnly]

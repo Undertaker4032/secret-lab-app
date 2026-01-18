@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import sys
 
 load_dotenv()
 
@@ -179,7 +180,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'api.middleware.RequestLoggingMiddleware',
+    'api.middleware.RequestLoggingMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
@@ -337,14 +338,8 @@ LOGGING = {
             'format': '{asctime} | {levelname:8} | {name} | {module}:{funcName}:{lineno} | {message}',
             'style': '{',
         },
-        'simple': {
-            'format': '{asctime} | {levelname:8} | {message}',
-            'style': '{',
-        },
-        'files': {
-            '()': 'api.log_formatters.ExtraFormatter',
-            'format': '{asctime} | {levelname:8} | {name} | {module}:{funcName}:{lineno} | {message}',
-            'style': '{',
+        'json': {
+            '()': 'api.log_formatters.AuditLogFormatter',
         },
     },
     
@@ -364,13 +359,19 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'json_console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'json',
+            'stream': sys.stdout,
+        },
         'file_app': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/app.log',
             'maxBytes': 1024*1024*10,
             'backupCount': 5,
-            'formatter': 'files',
+            'formatter': 'json',
             'encoding': 'utf-8',
         },
         'file_errors': {
@@ -379,7 +380,7 @@ LOGGING = {
             'filename': 'logs/errors.log',
             'maxBytes': 1024*1024*10,
             'backupCount': 5,
-            'formatter': 'files',
+            'formatter': 'json',
             'encoding': 'utf-8',
         },
         'file_security': {
@@ -387,8 +388,8 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/security.log',
             'maxBytes': 1024*1024*10,
-            'backupCount': 5,
-            'formatter': 'files',
+            'backupCount': 10,
+            'formatter': 'json',
             'encoding': 'utf-8',
         },
         'mail_admins': {
@@ -396,63 +397,67 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': False,
-        }
+        },
     },
     
     'loggers': {
         'django': {
-            'handlers': ['console', 'file_app'],
+            'handlers': ['console', 'json_console', 'file_app'],
             'level': 'INFO',
             'propagate': False,
         },
         'django.request': {
-            'handlers': ['file_errors', 'mail_admins'],
+            'handlers': ['file_errors', 'mail_admins', 'json_console'],
             'level': 'ERROR',
             'propagate': False,
         },
         'django.security': {
-            'handlers': ['file_security', 'mail_admins'],
+            'handlers': ['file_security', 'mail_admins', 'json_console'],
             'level': 'WARNING',
             'propagate': False,
         },
         'django.db.backends': {
-            'handlers': ['file_app'],
+            'handlers': ['file_app', 'json_console'],
             'level': 'WARNING',
             'propagate': False,
         },
-
         'api': {
-            'handlers': ['console', 'file_app'],
+            'handlers': ['console', 'json_console', 'file_app'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
         'api.auth': {
-            'handlers': ['console', 'file_security'],
+            'handlers': ['console', 'json_console', 'file_security'],
             'level': 'INFO',
             'propagate': False,
         },
         'api.data': {
-            'handlers': ['console', 'file_app'],
+            'handlers': ['console', 'json_console', 'file_app'],
             'level': 'INFO',
             'propagate': False,
         },
         'api.security': {
-            'handlers': ['file_security', 'mail_admins'],
-            'level': 'WARNING',
+            'handlers': ['file_security', 'json_console', 'mail_admins'],
+            'level': 'INFO',
             'propagate': False,
         },
         'employees': {
-            'handlers': ['console', 'file_app'],
+            'handlers': ['console', 'json_console', 'file_app'],
             'level': 'INFO',
             'propagate': False,
         },
         'documentation': {
-            'handlers': ['console', 'file_app'],
+            'handlers': ['console', 'json_console', 'file_app'],
             'level': 'INFO',
             'propagate': False,
         },
         'research': {
-            'handlers': ['console', 'file_app'],
+            'handlers': ['console', 'json_console', 'file_app'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'audit': {
+            'handlers': ['file_security', 'json_console'],
             'level': 'INFO',
             'propagate': False,
         },
