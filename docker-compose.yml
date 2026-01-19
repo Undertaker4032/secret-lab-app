@@ -35,6 +35,9 @@ services:
     pull_policy: always
     env_file:
       - .env
+    environment:
+      PYTHONUNBUFFERED: 1
+      LOGGING_STDOUT: "true"
     volumes:
       - backend_static:/app/staticfiles
       - backend_media:/app/media
