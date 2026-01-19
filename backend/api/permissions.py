@@ -1,5 +1,6 @@
 from rest_framework import permissions
 import logging
+from django.utils.timezone import now
 
 logger = logging.getLogger('api.security')
 
@@ -15,68 +16,82 @@ class HasRequiredClearanceLevel(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         try:
-            if request.method not in permissions.SAFE_METHODS:
-                logger.warning(f"Попытка небезопасного метода {request.method}",
-                             extra={'action': 'unsafe_method_attempt',
-                                    'user': request.user if request.user.is_authenticated else None,
-                                    'method': request.method})
-                return False
-            
+            user = request.user if request.user.is_authenticated else None
+            username = user.username if user else 'anonymous'
+
             required_clearance = getattr(obj, 'required_clearance', None)
 
+            log_data = {
+                'event_type': 'clearance_check',
+                'timestamp': now().isoformat(),
+                'user': username,
+                'user_id': user.id if user else None,
+                'object_type': type(obj).__name__,
+                'object_id': obj.id,
+                'method': request.method,
+                'path': request.path,
+                'ip': self._get_client_ip(request),
+            }
+
+            if required_clearance:
+                log_data['required_clearance'] = required_clearance.number
+
+            if request.method not in permissions.SAFE_METHODS:
+                log_data['access_granted'] = False
+                log_data['reason'] = 'unsafe_method_attempt'
+                logger.warning("Access denied: unsafe method", extra=log_data)
+                return False
+            
             if required_clearance is None:
-                logger.debug(f"Объект {obj} не требует уровня допуска",
-                           extra={'action': 'no_clearance_required',
-                                  'user': request.user if request.user.is_authenticated else None})
+                log_data['access_granted'] = True
+                log_data['reason'] = 'no_clearance_required'
+                logger.debug("Access granted: no required clearance", extra=log_data)
                 return True
 
             if required_clearance.number <= 1:
-                logger.debug(f"Объект {obj} требует минимального уровня допуска",
-                           extra={'action': 'minimal_clearance',
-                                  'user': request.user if request.user.is_authenticated else None,
-                                  'required_clearance': required_clearance.number})
+                log_data['access_granted'] = True
+                log_data['reason'] = 'no_clearance_required'
+                logger.debug("Access granted: no required clearance", extra=log_data)
                 return True
             
             if not request.user.is_authenticated:
-                logger.warning(f"Анонимный пользователь пытается получить доступ к объекту {obj} с требуемым уровнем {required_clearance.number}",
-                             extra={'action': 'clearance_denied_anonymous',
-                                    'user': None,
-                                    'required_clearance': required_clearance.number,
-                                    'object_type': type(obj).__name__})
+                log_data['access_granted'] = False
+                log_data['reason'] = 'unsafe_method_attempt'
+                logger.warning("Access denied: anonymous user", extra=log_data)
                 return False
             
             try:
-                user = request.user
-                username = user.username
                 user_clearance = user.employee.clearance_level
+                user_clearance_num = user_clearance.number if user_clearance else 1
+                log_data['user_clearance'] = user_clearance_num
             except AttributeError:
-                logger.warning(f"Пользователь {username} не имеет профиля сотрудника",
-                             extra={'action': 'no_employee_profile',
-                                    'user': user})
+                log_data['access_granted'] = False
+                log_data['reason'] = 'no_employee_profile'
+                logger.warning("Access denied: no employee profile", extra=log_data)
                 return False
             
-            has_access = user_clearance.number >= required_clearance.number
+            has_access = user_clearance_num >= required_clearance.number
+            log_data['access_granted'] = has_access
 
             if has_access:
-                logger.debug(f"Доступ разрешен: {username} с уровнем {user_clearance.number} к объекту с уровнем {required_clearance.number}",
-                           extra={'action': 'clearance_granted',
-                                  'user': user,
-                                  'user_clearance': user_clearance.number,
-                                  'required_clearance': required_clearance.number,
-                                  'object_type': type(obj).__name__})
+                log_data['reason'] = 'has_required_clearance'
+                logger.info("Access granted", extra=log_data)
             else:
-                logger.warning(f"Недостаточный У.Д: пользователь {username} с {user_clearance.name}({user_clearance.number}) пытается получить доступ к объекту {required_clearance.name}({required_clearance.number})",
-                             extra={'action': 'clearance_denied',
-                                    'user': user,
-                                    'user_clearance': user_clearance.number,
-                                    'required_clearance': required_clearance.number,
-                                    'object_type': type(obj).__name__})
+                log_data['reason'] = 'insuffisient_clearance'
+                logger.warning("Access denied: insufficient clearance", extra=log_data)
             
             return has_access
     
         except Exception as e:
-            logger.error(f"Ошибка проверки уровня допуска: {str(e)}",
-                       extra={'action': 'clearance_check_error',
-                              'user': request.user if request.user.is_authenticated else None},
+            logger.error(f"Clearance check error: {str(e)}", 
+                       extra={'event_type': 'clearance_check_error',
+                              'user': username if 'username' in locals() else 'unknown',
+                              'object_type': type(obj).__name__ if 'obj' in locals() else 'unknown'},
                        exc_info=True)
             return False
+        
+    def _get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0]
+        return request.META.get('REMOTE_ADDR')

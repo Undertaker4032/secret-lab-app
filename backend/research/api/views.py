@@ -3,11 +3,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Research, ResearchStatus
 from .serializers import ResearchListSerializer, ResearchObjectSerializer, ResearchStatusSerializer
 from api.permissions import ReadOnly, HasRequiredClearanceLevel
-import logging
+from core.logging_utils import log_research_access, log_suspicious_activity
 from rest_framework.throttling import ScopedRateThrottle
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 import django_filters
+import time
+import logging
 
 logger = logging.getLogger('research')
 
@@ -58,23 +60,88 @@ class ResearchViewSet(viewsets.ModelViewSet):
 
     @method_decorator(cache_page(60 * 5))
     def list(self, request, *args, **kwargs):
-        logger.info(f"Запрос списка исследований от пользователя: {request.user}")
-
+        start_time = time.time()
+        
         try:
             response = super().list(request, *args, **kwargs)
-            logger.debug(f"Успешно возвращено {len(response.data)} исследований")
+            duration_ms = int((time.time() - start_time) * 1000)
+            
+            log_research_access(
+                request=request,
+                research=None,
+                action='list',
+                duration_ms=duration_ms
+            )
+            
+            logger.info(
+                "Research list retrieved",
+                extra={
+                    'event_type': 'research_list',
+                    'user': request.user.username if request.user.is_authenticated else 'anonymous',
+                    'count': len(response.data) if isinstance(response.data, list) else response.data.get('count', 0),
+                    'filters': dict(request.GET),
+                    'duration_ms': duration_ms,
+                }
+            )
+            
             return response
+            
         except Exception as e:
-            logger.error(f"Ошибка при получении исследований: {e}", exc_info=True)
+            duration_ms = int((time.time() - start_time) * 1000)
+            logger.error(
+                f"Error retrieving research list: {e}",
+                extra={
+                    'event_type': 'research_list_error',
+                    'user': request.user.username if request.user.is_authenticated else 'anonymous',
+                    'duration_ms': duration_ms,
+                },
+                exc_info=True
+            )
             raise
 
     @method_decorator(cache_page(60 * 10))
     def retrieve(self, request, *args, **kwargs):
-        username = request.user.username if request.user.is_authenticated else 'Anonymous'
-        research = self.get_object()
-        logger.info(f"Запрос исследования '{research.title}' [ID:{research.id}] от пользователя {username}",
-                   extra={'action': 'research_retrieve', 'user': username})
-        return super().retrieve(request, *args, **kwargs)
+        start_time = time.time()
+        
+        try:
+            research = self.get_object()
+            duration_ms = int((time.time() - start_time) * 1000)
+            
+            log_research_access(
+                request=request,
+                research=research,
+                action='view',
+                duration_ms=duration_ms
+            )
+            
+            logger.info(
+                f"Research retrieved: {research.title}",
+                extra={
+                    'event_type': 'research_retrieve',
+                    'user': request.user.username if request.user.is_authenticated else 'anonymous',
+                    'research_id': research.id,
+                    'research_title': research.title[:100],
+                    'research_status': research.status.name,
+                    'required_clearance': research.required_clearance.number,
+                    'duration_ms': duration_ms,
+                }
+            )
+            
+            return super().retrieve(request, *args, **kwargs)
+            
+        except Exception as e:
+            duration_ms = int((time.time() - start_time) * 1000)
+            logger.error(
+                f"Error retrieving research: {e}",
+                extra={
+                    'event_type': 'research_retrieve_error',
+                    'user': request.user.username if request.user.is_authenticated else 'anonymous',
+                    'research_id': kwargs.get('pk'),
+                    'duration_ms': duration_ms,
+                },
+                exc_info=True
+            )
+            raise
     
 class ResearchStatusViewSet(viewsets.ModelViewSet):
     throttle_scope = 'api'
