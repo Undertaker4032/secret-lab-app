@@ -27,7 +27,6 @@
 		try {
 			console.log('Initializing auth...');
 			
-			// Сначала проверяем доступность бэкенда
 			try {
 				const healthResponse = await fetch('/api/health/', {
 					credentials: 'include',
@@ -42,12 +41,11 @@
 
 			if (!backendAvailable) {
 				console.log('Backend not available, skipping auth initialization');
-				authError = false; // Не показываем ошибку, просто пропускаем аутентификацию
+				authError = false;
 				authLoading.set(false);
 				return;
 			}
 			
-			// Получаем CSRF токен с retry логикой
 			let csrfSuccess = false;
 			let retries = 5;
 			

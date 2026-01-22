@@ -11,7 +11,6 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
     request = context.get('request')
     
-    # Если DRF не обработал исключение
     if response is None:
         user_info = f"user:{request.user.username}" if request and request.user.is_authenticated else "user:anonymous"
         logger.error(
