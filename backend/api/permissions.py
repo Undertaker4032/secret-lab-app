@@ -42,7 +42,7 @@ class HasRequiredClearanceLevel(permissions.BasePermission):
                 logger.warning("Access denied: unsafe method", extra=log_data)
                 return False
             
-            if required_clearance is None:
+            if required_clearance.number is None:
                 log_data['access_granted'] = True
                 log_data['reason'] = 'no_clearance_required'
                 logger.debug("Access granted: no required clearance", extra=log_data)
