@@ -20,6 +20,7 @@ class HasRequiredClearanceLevel(permissions.BasePermission):
             username = user.username if user else 'anonymous'
 
             required_clearance = getattr(obj, 'required_clearance', None)
+            required_clearance_num = required_clearance.number
 
             log_data = {
                 'event_type': 'clearance_check',
@@ -34,7 +35,7 @@ class HasRequiredClearanceLevel(permissions.BasePermission):
             }
 
             if required_clearance:
-                log_data['required_clearance'] = required_clearance.number
+                log_data['required_clearance'] = required_clearance_num
 
             if request.method not in permissions.SAFE_METHODS:
                 log_data['access_granted'] = False
@@ -42,13 +43,13 @@ class HasRequiredClearanceLevel(permissions.BasePermission):
                 logger.warning("Access denied: unsafe method", extra=log_data)
                 return False
             
-            if required_clearance.number is None:
+            if required_clearance == None:
                 log_data['access_granted'] = True
                 log_data['reason'] = 'no_clearance_required'
                 logger.debug("Access granted: no required clearance", extra=log_data)
                 return True
 
-            if required_clearance.number <= 1:
+            if required_clearance_num <= 1:
                 log_data['access_granted'] = True
                 log_data['reason'] = 'no_clearance_required'
                 logger.debug("Access granted: no required clearance", extra=log_data)
@@ -56,7 +57,7 @@ class HasRequiredClearanceLevel(permissions.BasePermission):
             
             if not request.user.is_authenticated:
                 log_data['access_granted'] = False
-                log_data['reason'] = 'unsafe_method_attempt'
+                log_data['reason'] = 'not_authenticated'
                 logger.warning("Access denied: anonymous user", extra=log_data)
                 return False
             
@@ -70,7 +71,7 @@ class HasRequiredClearanceLevel(permissions.BasePermission):
                 logger.warning("Access denied: no employee profile", extra=log_data)
                 return False
             
-            has_access = user_clearance_num >= required_clearance.number
+            has_access = user_clearance_num >= required_clearance_num
             log_data['access_granted'] = has_access
 
             if has_access:
