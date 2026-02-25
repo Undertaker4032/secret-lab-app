@@ -24,7 +24,7 @@ class Documentation(models.Model):
     allowed_clusters = models.ManyToManyField(Cluster, blank=True, verbose_name="Доступ Кластерам")
     allowed_departments = models.ManyToManyField(Department, blank=True, verbose_name="Доступ Департаментам")
     allowed_divisions = models.ManyToManyField(Division, blank=True, verbose_name="Доступ Отделам")
-    allowed_employees = models.ManyToManyField(Employee, related_name="research_allowed", blank=True, verbose_name="Доступ Сотрудникам")
+    allowed_employees = models.ManyToManyField(Employee, related_name="documentation_allowed", blank=True, verbose_name="Доступ Сотрудникам")
 
     class Meta:
         verbose_name = 'Документ'
