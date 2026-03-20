@@ -102,7 +102,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
             )
             raise
 
-    @method_decorator(cache_page(60 * 5))
     def retrieve(self, request, *args, **kwargs):
         start_time = time.time()
         
