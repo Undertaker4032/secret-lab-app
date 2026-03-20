@@ -23,6 +23,11 @@ class ResearchObjectSerializer(serializers.ModelSerializer):
     status_name = serializers.CharField(source='status.name', read_only=True)
     required_clearance_name = serializers.CharField(source='required_clearance.name', read_only=True)
 
+    allowed_clusters = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    allowed_departments = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    allowed_divisions = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    allowed_employees = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+
     class Meta:
         model = Research
         fields = ['id', 'title',
@@ -31,7 +36,9 @@ class ResearchObjectSerializer(serializers.ModelSerializer):
                   'lead', 'lead_name',
                   'team', 'team_members',
                   'required_clearance', 'required_clearance_name',
-                  'created_date', 'updated_date']
+                  'created_date', 'updated_date',
+                  'allowed_clusters', 'allowed_departments',
+                  'allowed_divisions', 'allowed_employees']
     read_only_fields = ['created_date', 'updated_date']
 
     def get_team_members(self, obj) -> list:

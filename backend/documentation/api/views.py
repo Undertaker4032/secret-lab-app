@@ -49,6 +49,11 @@ class DocumentViewSet(viewsets.ModelViewSet):
             'author',
             'type',
             'required_clearance'
+        ).prefetch_related(
+            'allowed_clusters',
+            'allowed_departments',
+            'allowed_divisions',
+            'allowed_employees'
         ).order_by('required_clearance')
     
     def get_serializer_class(self):

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from ..models import Documentation, DocumentType
-
+from employees.models import Cluster, Department, Division, Employee
 
 class DocumentListSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source='author.name', read_only=True)
@@ -22,6 +22,11 @@ class DocumentObjectSerializer(serializers.ModelSerializer):
     type_name = serializers.CharField(source='type.name', read_only=True)
     required_clearance_name = serializers.CharField(source='required_clearance.name', read_only=True)
 
+    allowed_clusters = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    allowed_departments = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    allowed_divisions = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    allowed_employees = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+
     class Meta:
         model = Documentation
         fields = ['id', 'title',
@@ -29,8 +34,11 @@ class DocumentObjectSerializer(serializers.ModelSerializer):
                   'content', 'author',
                   'author_name', 'created_date',
                   'updated_date', 'required_clearance',
-                  'required_clearance_name']
+                  'required_clearance_name',
+                  'allowed_clusters', 'allowed_departments',
+                  'allowed_divisions', 'allowed_employees']
     read_only_fields = ['created_date', 'updated_date']
+
 
 class DocumentTypeSerializer(serializers.ModelSerializer):
     class Meta:

@@ -15,10 +15,10 @@ class ResearchAdmin(admin.ModelAdmin):
     list_filter = ('status', 'required_clearance', 'created_date')
     search_fields = ('title', 'content', 'lead__name')
     readonly_fields = ('created_date', 'updated_date')
-    filter_horizontal = ('team',)
+    filter_horizontal = ('team', 'allowed_clusters', 'allowed_departments', 'allowed_divisions', 'allowed_employees')
     date_hierarchy = 'created_date'
     list_select_related = ('lead', 'status', 'required_clearance')
-    raw_id_fields = ('lead', 'status', 'required_clearance')
+    raw_id_fields = ('lead',)
     
     fieldsets = (
         (None, {
@@ -29,6 +29,10 @@ class ResearchAdmin(admin.ModelAdmin):
         }),
         ('Доступ', {
             'fields': ('required_clearance',)
+        }),
+        ('Доступ', {
+            'fields': ('allowed_clusters', 'allowed_departments', 'allowed_divisions', 'allowed_employees'),
+            'classes': ('collapse',)
         }),
         ('Даты', {
             'fields': ('created_date', 'updated_date'),
@@ -61,4 +65,4 @@ class ResearchAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
             'lead', 'status', 'required_clearance'
-        ).prefetch_related('team')
+        ).prefetch_related('team', 'allowed_clusters', 'allowed_departments', 'allowed_divisions', 'allowed_employees')

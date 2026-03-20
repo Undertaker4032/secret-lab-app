@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import DocumentType, Documentation
+from employees.models import Cluster, Department, Division, Employee
 
 @admin.register(DocumentType)
 class DocumentTypeAdmin(admin.ModelAdmin):
@@ -17,14 +18,19 @@ class DocumentationAdmin(admin.ModelAdmin):
     readonly_fields = ('created_date', 'updated_date')
     date_hierarchy = 'created_date'
     list_select_related = ('type', 'author', 'required_clearance')
-    raw_id_fields = ('author', 'type', 'required_clearance')
-    
+    raw_id_fields = ('author',)
+    filter_horizontal = ('allowed_clusters', 'allowed_departments', 'allowed_divisions', 'allowed_employees')
+
     fieldsets = (
         (None, {
             'fields': ('title', 'type', 'content')
         }),
         ('Метаданные', {
             'fields': ('author', 'required_clearance')
+        }),
+        ('Доступ', {
+            'fields': ('allowed_clusters', 'allowed_departments', 'allowed_divisions', 'allowed_employees'),
+            'classes': ('collapse',)
         }),
         ('Даты', {
             'fields': ('created_date', 'updated_date'),
@@ -45,4 +51,6 @@ class DocumentationAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
             'type', 'author', 'required_clearance'
+        ).prefetch_related(
+            'allowed_clusters', 'allowed_departments', 'allowed_divisions', 'allowed_employees'
         )

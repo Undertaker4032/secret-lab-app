@@ -50,9 +50,9 @@ class EmployeeAdmin(admin.ModelAdmin):
     list_display_links = ('clickable_name',)
     list_filter = ('is_active', 'clearance_level', 'division__department__cluster', 'position', 'division')
     search_fields = ('name', 'user__username', 'user__email', 'division__name')
-    readonly_fields = ('get_department', 'get_cluster', 'user_link')
+    readonly_fields = ('get_department', 'get_cluster')
     list_select_related = ('position', 'division__department__cluster', 'clearance_level', 'user')
-    raw_id_fields = ('user', 'division', 'position', 'clearance_level')
+    raw_id_fields = ('user',)
     
     fieldsets = (
         (None, {
@@ -62,7 +62,7 @@ class EmployeeAdmin(admin.ModelAdmin):
             'fields': ('division', 'position', 'get_department', 'get_cluster')
         }),
         ('Дополнительно', {
-            'fields': ('profile_picture', 'user_link'),
+            'fields': ('profile_picture',),
             'classes': ('collapse',)
         }),
     )
@@ -89,13 +89,6 @@ class EmployeeAdmin(admin.ModelAdmin):
     def get_department(self, obj):
         return obj.department
     get_department.short_description = 'Департамент'
-    
-    def user_link(self, obj):
-        if obj.user and obj.user.id:
-            url = f"/admin/auth/user/{obj.user.id}/change/"
-            return format_html('<a href="{}" target="_blank">{}</a>', url, obj.user.username)
-        return "-"
-    user_link.short_description = 'Пользователь'
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
