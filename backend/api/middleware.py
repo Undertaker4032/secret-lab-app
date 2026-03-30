@@ -27,6 +27,9 @@ class RequestLoggingMiddleware(MiddlewareMixin):
         )
     
     def process_response(self, request, response):
+        if hasattr(request, 'id'):
+            response['X-Request-ID'] = request.id
+        
         if hasattr(request, 'start_time'):
             duration = time.time() - request.start_time
             
