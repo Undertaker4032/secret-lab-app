@@ -148,7 +148,14 @@ jobs:
           cd /home/deploy/RMS-site
           
           echo "${{ secrets.PROD_ENV_FILE }}" > .env
-          
+
+          mkdir -p nginx/ssl
+          echo "${{ secrets.SSL_CERT }}" > nginx/ssl/rms-labs.ru.chained.crt
+          echo "${{ secrets.SSL_KEY }}" > nginx/ssl/certificate.key
+
+          chmod 644 nginx/ssl/rms-labs.ru.chained.crt
+          chmod 600 nginx/ssl/certificate.key
+
           docker logout ghcr.io 2>/dev/null || true
           echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u Undertaker4032 --password-stdin
           
