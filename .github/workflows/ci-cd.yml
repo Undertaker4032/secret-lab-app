@@ -146,13 +146,20 @@ jobs:
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
           cd /home/deploy/RMS-site
-          
+
+          if [ ! -d .git ]; then
+            git clone --depth 1 --branch main https://github.com/Undertaker4032/RMS-site.git tmp_repo
+            rsync -a tmp_repo/ . --exclude .git --exclude nginx/ssl --exclude .env
+            rm -rf tmp_repo
+          else
+            git pull origin main
+          fi
+
           echo "${{ secrets.PROD_ENV_FILE }}" > .env
 
           mkdir -p nginx/ssl
           echo "${{ secrets.SSL_CERT }}" > nginx/ssl/rms-labs.ru.chained.crt
           echo "${{ secrets.SSL_KEY }}" > nginx/ssl/certificate.key
-
           chmod 644 nginx/ssl/rms-labs.ru.chained.crt
           chmod 600 nginx/ssl/certificate.key
 
@@ -161,7 +168,6 @@ jobs:
           
           docker compose -f docker-compose.yml pull
           docker compose -f docker-compose.yml down
-
           docker compose -f docker-compose.yml up -d
 
           sleep 10
