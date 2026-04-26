@@ -148,7 +148,7 @@ jobs:
           cd /home/deploy/RMS-site
 
           if [ ! -d .git ]; then
-            git clone --depth 1 --branch main https://github.com/Undertaker4032/RMS-site.git tmp_repo
+            git clone --depth 1 --branch main https://github.com/Undertaker4032/secret-lab-app.git tmp_repo
             rsync -a tmp_repo/ . --exclude .git --exclude nginx/ssl --exclude .env
             rm -rf tmp_repo
           else
