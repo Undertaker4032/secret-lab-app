@@ -94,6 +94,8 @@
       if (researchData?.content) {
         renderedContent = markdownToHtml(researchData.content);
         tableOfContents = getTableOfContents(renderedContent);
+
+        tableOfContents = getTableOfContents(renderedContent).filter(item => item.level <= 2);
         
         shouldSetupObserver = true;
       }
